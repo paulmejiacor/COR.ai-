@@ -1,7 +1,7 @@
 import { useRef, useState } from 'react';
 import { Alert, Image, Pressable, ScrollView, TextInput, View, StyleSheet } from 'react-native';
 import { captureRef } from 'react-native-view-shot';
-import * as Sharing from 'expo-sharing';
+import * as MediaLibrary from 'expo-media-library/legacy';
 import type { ImageResult } from 'expo-image-manipulator';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import {
@@ -186,17 +186,18 @@ export function ExportScreen({ route, navigation }: Props) {
     }
   };
 
-  const handleShareExported = async () => {
+  const handleDownloadExported = async () => {
     if (!exported) return;
     try {
-      const available = await Sharing.isAvailableAsync();
-      if (!available) {
-        Alert.alert('No disponible', 'Compartir no está disponible en este dispositivo.');
+      const { status } = await MediaLibrary.requestPermissionsAsync();
+      if (status !== 'granted') {
+        Alert.alert('Permiso necesario', 'Activa el permiso de fotos para poder guardar la imagen en tu galería.');
         return;
       }
-      await Sharing.shareAsync(exported.uri);
+      await MediaLibrary.saveToLibraryAsync(exported.uri);
+      Alert.alert('Descargada', 'La imagen se guardó en tu galería.');
     } catch (error) {
-      Alert.alert('No se pudo compartir', String(error));
+      Alert.alert('No se pudo descargar', String(error));
     }
   };
 
@@ -401,9 +402,9 @@ export function ExportScreen({ route, navigation }: Props) {
               <Text variant="caption" color="secondary" style={{ marginTop: 2 }}>
                 {exported.width} × {exported.height}
               </Text>
-              <Pressable onPress={handleShareExported} style={{ marginTop: theme.spacing.xs }}>
+              <Pressable onPress={handleDownloadExported} style={{ marginTop: theme.spacing.xs }}>
                 <Text variant="bodySmall" color="accent">
-                  Compartir archivo
+                  Descargar imagen
                 </Text>
               </Pressable>
             </View>

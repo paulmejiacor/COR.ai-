@@ -37,6 +37,13 @@
         {
           "photosPermission": "COR necesita acceso a tus fotos para elegir la fotografía del vehículo."
         }
+      ],
+      [
+        "expo-media-library",
+        {
+          "photosPermission": "COR necesita acceso a tus fotos para guardar las imágenes exportadas.",
+          "savePhotosPermission": "COR necesita permiso para guardar las imágenes exportadas en tu galería."
+        }
       ]
     ]
   }
