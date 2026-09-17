@@ -10,3 +10,5 @@ export * from './Icon';
 export * from './Header';
 export * from './NavCard';
 export * from './OptionTile';
+export * from './Slider';
+export * from './SegmentedControl';

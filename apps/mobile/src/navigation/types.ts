@@ -1,3 +1,5 @@
+import type { ImageSourcePropType } from 'react-native';
+
 /**
  * Rutas "próximamente": pantallas que ya se pueden abrir pero cuyo
  * contenido real se construye en una fase posterior del plan acordado.
@@ -18,6 +20,11 @@ export type CapturedPhotoParams = {
   source: 'camera' | 'gallery';
 };
 
+export type CompositionEditorParams = CapturedPhotoParams & {
+  sceneDescription?: string;
+  sceneThumbnail?: ImageSourcePropType;
+};
+
 export type RootStackParamList = {
   Home: undefined;
   NewCreation: undefined;
@@ -25,5 +32,6 @@ export type RootStackParamList = {
   Detection: CapturedPhotoParams;
   MaskReview: CapturedPhotoParams;
   SceneSelection: CapturedPhotoParams;
+  CompositionEditor: CompositionEditorParams;
   Placeholder: PlaceholderRoute;
 };

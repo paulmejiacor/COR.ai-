@@ -30,11 +30,14 @@ export function SceneSelectionScreen({ route, navigation }: Props) {
   };
 
   const handleContinue = () => {
-    navigation.navigate('Placeholder', {
-      title: 'Editor de composición',
-      phase: 'Fase 8 — Editor de composición',
+    const selectedPreset = SCENE_PRESETS.find((p) => p.id === selectedId);
+    navigation.navigate('CompositionEditor', {
       photoUri,
-      note: description.trim() || undefined,
+      photoWidth,
+      photoHeight,
+      source,
+      sceneDescription: description.trim() || undefined,
+      sceneThumbnail: selectedPreset?.thumbnail,
     });
   };
 

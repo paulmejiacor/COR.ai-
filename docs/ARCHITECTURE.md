@@ -133,7 +133,20 @@ Nuevo paquete `packages/design-system` (`@cor/design-system`), consumido por `ap
 - `expo export --platform web` — bundlea sin errores, assets locales (`cor-showroom-*.jpg`) incluidos en el bundle.
 - Verificación real en Chromium: las dos plantillas propias de COR (imágenes locales) cargan correctamente; las plantillas de Unsplash no cargaron en esta verificación porque el proxy de red de este entorno de pruebas bloquea `images.unsplash.com` — confirmado con una prueba de conexión directa (403 del proxy) — pero es una CDN pública sin restricciones, así que cargarán con normalidad en el teléfono del usuario. Seleccionar una plantilla rellena el texto correctamente, y "CONTINUAR" navega a la Fase 8 con el escenario elegido visible. Sin errores de consola relacionados con el código de la app.
 
-## 16. Próximas fases (según el plan acordado)
+## 16. Editor de composición (Fase 8)
+
+- `CompositionEditorScreen` (ruta `CompositionEditor`): controles de **Posición** (`SegmentedControl` izquierda/centro/derecha), **Escala**, **Altura visual**, **Distancia** y **Rotación** (opcional), todos usando `computeVehicleTransform` de `@cor/image-processing` (ya existía desde la Fase 1) para convertir los valores en una transformación de capa — el vehículo se mueve/escala/rota como imagen completa, nunca se deforma.
+- Nuevos componentes de design system, reutilizables en fases futuras: `Slider` (control deslizante propio, sin dependencia nativa) y `SegmentedControl` (genérico, tipado).
+- La vista previa compone la fotografía del vehículo sobre la miniatura del escenario elegido en la Fase 7 (o un fondo neutro si el usuario escribió texto libre sin elegir plantilla).
+- Al continuar, un resumen legible de la composición (posición/escala/rotación/distancia) se agrega a la descripción del escenario y viaja hacia el placeholder de la Fase 9.
+
+## 17. Estado verificado (Fase 8)
+
+- `npm run typecheck` — limpio en los 7 workspaces.
+- `expo export --platform web` — bundlea sin errores.
+- Verificación real en Chromium: arrastrar el slider de Escala cambia el tamaño del vehículo en vivo (probado hasta 1.35x); tocar "Izquierda" lo reposiciona sin deformarlo; arrastrar Rotación lo gira visiblemente (probado a 6°); "CONTINUAR" navega a la Fase 9 con el resumen completo de la composición. Sin errores de consola.
+
+## 18. Próximas fases (según el plan acordado)
 
 1. ~~Arquitectura~~ ✅
 2. ~~Sistema visual COR~~ ✅
@@ -142,7 +155,7 @@ Nuevo paquete `packages/design-system` (`@cor/design-system`), consumido por `ap
 5. ~~Carga de fotografía (cámara/galería)~~ ✅
 6. ~~Detección del vehículo~~ ✅
 7. ~~Selección de escenario~~ ✅
-8. Editor de composición
+8. ~~Editor de composición~~ ✅
 9. Pantalla de procesamiento
 10. Resultado
 11. Comparador antes/después
@@ -150,4 +163,4 @@ Nuevo paquete `packages/design-system` (`@cor/design-system`), consumido por `ap
 13. Historial ("Mis proyectos")
 14. Preparación de integración real de IA
 
-No se avanza a la Fase 8 hasta confirmación.
+No se avanza a la Fase 9 hasta confirmación.
