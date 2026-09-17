@@ -30,6 +30,33 @@ export function CompositionEditorScreen({ route, navigation }: Props) {
   const [settings, setSettings] = useState<CompositionSettings>(DEFAULT_COMPOSITION_SETTINGS);
   const [manualOffset, setManualOffset] = useState({ x: 0, y: 0 });
   const [preview, setPreview] = useState({ width: 0, height: 0 });
+  const [sceneAspectRatio, setSceneAspectRatio] = useState(4 / 3);
+
+  useEffect(() => {
+    if (!sceneThumbnail) {
+      setSceneAspectRatio(4 / 3);
+      return;
+    }
+    // Escenarios remotos (Unsplash): no traen dimensiones, hay que consultarlas.
+    if (typeof sceneThumbnail === 'object' && 'uri' in sceneThumbnail && sceneThumbnail.uri) {
+      let cancelled = false;
+      Image.getSize(
+        sceneThumbnail.uri,
+        (width, height) => {
+          if (!cancelled && width > 0 && height > 0) setSceneAspectRatio(clamp(width / height, 0.6, 2));
+        },
+        () => {}
+      );
+      return () => {
+        cancelled = true;
+      };
+    }
+    // Escenarios locales (require): la proporción real viene resuelta por Metro sin red.
+    const resolved = Image.resolveAssetSource(sceneThumbnail);
+    if (resolved?.width && resolved?.height) {
+      setSceneAspectRatio(clamp(resolved.width / resolved.height, 0.6, 2));
+    }
+  }, [sceneThumbnail]);
 
   const settingsRef = useRef(settings);
   useEffect(() => {
@@ -167,7 +194,12 @@ export function CompositionEditorScreen({ route, navigation }: Props) {
           onLayout={onPreviewLayout}
           style={[
             styles.preview,
-            { borderRadius: theme.radii.lg, backgroundColor: theme.colors.surface, borderColor: theme.colors.border },
+            {
+              aspectRatio: sceneAspectRatio,
+              borderRadius: theme.radii.lg,
+              backgroundColor: theme.colors.surface,
+              borderColor: theme.colors.border,
+            },
           ]}
         >
           {sceneThumbnail ? (
@@ -280,7 +312,6 @@ function ControlSlider({
 const styles = StyleSheet.create({
   preview: {
     width: '100%',
-    aspectRatio: 4 / 3,
     overflow: 'hidden',
     borderWidth: StyleSheet.hairlineWidth,
   },
