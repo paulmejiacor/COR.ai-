@@ -23,6 +23,22 @@ import { exportImageToSpec, reencodeImage } from '../lib/exportImage';
 
 const CAPTURE_WIDTH = 360;
 
+function withTimeout<T>(promise: Promise<T>, ms: number, label: string): Promise<T> {
+  return new Promise((resolve, reject) => {
+    const timer = setTimeout(() => reject(new Error(`Tiempo agotado esperando: ${label}`)), ms);
+    promise.then(
+      (value) => {
+        clearTimeout(timer);
+        resolve(value);
+      },
+      (error) => {
+        clearTimeout(timer);
+        reject(error);
+      }
+    );
+  });
+}
+
 function computeWatermarkBox(
   containerWidth: number,
   containerHeight: number,
@@ -131,27 +147,32 @@ export function ExportScreen({ route, navigation }: Props) {
       // exacta del formato elegido — no es solo una vista previa. Espera a
       // que TANTO la foto como el logo terminen de pintarse antes de
       // capturar: el logo también carga de forma asíncrona, y capturar
-      // antes de tiempo produce un archivo sin la marca.
-      setCaptureSpec({ width: spec.width, height: spec.height });
-      const baseReady = new Promise<void>((resolve) => {
-        captureImageLoadResolver.current = resolve;
-      });
-      const logoReady = new Promise<void>((resolve) => {
-        captureLogoLoadResolver.current = resolve;
-      });
-      setCaptureImageUri(cropped.uri);
-      await Promise.all([baseReady, logoReady]);
-      await new Promise((resolve) => setTimeout(resolve, 200));
+      // antes de tiempo produce un archivo sin la marca. Cada paso tiene un
+      // límite de tiempo: si algo no responde, se entrega igual la imagen
+      // recortada (sin marca) en vez de dejar la exportación trabada.
+      try {
+        setCaptureSpec({ width: spec.width, height: spec.height });
+        const baseReady = new Promise<void>((resolve) => {
+          captureImageLoadResolver.current = resolve;
+        });
+        const logoReady = new Promise<void>((resolve) => {
+          captureLogoLoadResolver.current = resolve;
+        });
+        setCaptureImageUri(cropped.uri);
+        await withTimeout(Promise.all([baseReady, logoReady]), 6000, 'cargar la foto y el logo');
+        await new Promise((resolve) => setTimeout(resolve, 200));
 
-      const rawUri = await captureRef(hiddenViewRef, {
-        format: 'png',
-        quality: 1,
-        result: 'tmpfile',
-        width: spec.width,
-        height: spec.height,
-      });
-      const final = await reencodeImage(rawUri, spec.format, spec.quality);
-      setExported(final);
+        const rawUri = await withTimeout(
+          captureRef(hiddenViewRef, { format: 'png', quality: 1, result: 'tmpfile', width: spec.width, height: spec.height }),
+          8000,
+          'capturar la marca de agua'
+        );
+        const final = await withTimeout(reencodeImage(rawUri, spec.format, spec.quality), 8000, 'convertir el formato final');
+        setExported(final);
+      } catch (watermarkError) {
+        Alert.alert('Marca de agua no aplicada', `No se pudo aplicar la marca esta vez (${String(watermarkError)}). Se exportó la imagen sin marca.`);
+        setExported(cropped);
+      }
     } catch (error) {
       Alert.alert('No se pudo exportar', String(error));
     } finally {
