@@ -144,12 +144,15 @@ export function ExportScreen({ route, navigation }: Props) {
 
       // Hornea la marca en los píxeles reales: monta la composición (foto ya
       // recortada + logo) en la vista oculta y la rasteriza a la resolución
-      // exacta del formato elegido — no es solo una vista previa. Espera a
-      // que TANTO la foto como el logo terminen de pintarse antes de
-      // capturar: el logo también carga de forma asíncrona, y capturar
-      // antes de tiempo produce un archivo sin la marca. Cada paso tiene un
-      // límite de tiempo: si algo no responde, se entrega igual la imagen
-      // recortada (sin marca) en vez de dejar la exportación trabada.
+      // exacta del formato elegido — no es solo una vista previa. La foto
+      // recortada es un archivo nuevo cada vez, así que sí esperamos su
+      // evento de carga real; el logo es un recurso empaquetado en la app
+      // (ya se mostró antes en la vista previa de esta misma pantalla), así
+      // que no bloqueamos la exportación esperando su "onLoad" — en algunos
+      // dispositivos ese evento nunca llega para imágenes locales estáticas,
+      // y eso fue justo lo que dejó la exportación trabada. Cada paso tiene
+      // además un límite de tiempo: si algo no responde, se entrega igual la
+      // imagen recortada (sin marca) en vez de dejar la exportación trabada.
       try {
         setCaptureSpec({ width: spec.width, height: spec.height });
         const baseReady = new Promise<void>((resolve) => {
@@ -159,8 +162,9 @@ export function ExportScreen({ route, navigation }: Props) {
           captureLogoLoadResolver.current = resolve;
         });
         setCaptureImageUri(cropped.uri);
-        await withTimeout(Promise.all([baseReady, logoReady]), 6000, 'cargar la foto y el logo');
-        await new Promise((resolve) => setTimeout(resolve, 200));
+        await withTimeout(baseReady, 6000, 'cargar la foto recortada');
+        await Promise.race([logoReady, new Promise((resolve) => setTimeout(resolve, 300))]);
+        await new Promise((resolve) => setTimeout(resolve, 250));
 
         const rawUri = await withTimeout(
           captureRef(hiddenViewRef, { format: 'png', quality: 1, result: 'tmpfile', width: spec.width, height: spec.height }),
