@@ -198,7 +198,11 @@ export function ExportScreen({ route, navigation }: Props) {
           />
         ) : null}
         {captureBox ? (
-          <View style={[styles.watermarkBox, captureBox, { opacity: watermarkOpacity }]} pointerEvents="none">
+          <View
+            collapsable={false}
+            style={[styles.watermarkBox, captureBox, { opacity: watermarkOpacity }]}
+            pointerEvents="none"
+          >
             <Logo height={captureBox.height} tone="light" onLoad={() => captureLogoLoadResolver.current?.()} />
             {watermarkVariant === 'logo_name' ? (
               <Text variant="caption" style={styles.watermarkCaption} numberOfLines={1}>
