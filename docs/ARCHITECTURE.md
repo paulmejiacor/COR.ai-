@@ -193,7 +193,7 @@ Metadatos mostrados: Vehículo (origen cámara/galería), Escenario (la descripc
 
 - **Formatos**: los 6 presets exactos del brief (Instagram Post, Instagram Story, Web, WhatsApp, Facebook, Original) más "Personalizado" (ancho/alto/formato JPG·PNG·WebP), usando `EXPORT_PRESETS` y `resolveExportSpec` de `@cor/shared-types`/`@cor/image-processing` — ya definidos desde la Fase 1, sin cambios.
 - **Exportación real, no simulada**: `computeCoverCropRect` (nuevo, en `@cor/image-processing`) calcula un recorte centrado que conserva la relación de aspecto del formato elegido sin deformar la imagen; `apps/mobile/src/lib/exportImage.ts` aplica ese recorte y el resize final con `expo-image-manipulator`. El botón "Exportar" de la Fase 10 ya no es un placeholder: produce un archivo nuevo, del tamaño y formato correctos, que se puede compartir con `expo-sharing`.
-- **Marca COR (watermark)**: Logo / Logo + nombre / Sin marca, las 4 esquinas, y sliders de Tamaño y Opacidad — usando `computeWatermarkLayout` de `@cor/image-processing` (Fase 1) para posicionar el isologo real (Fase 6) sobre la vista previa en vivo. Importante: el watermark se **previsualiza** de forma real sobre la imagen en pantalla, pero todavía no se "hornea" en los píxeles del archivo exportado — eso requiere composición de imágenes (Skia o canvas), fuera del alcance de `expo-image-manipulator`. Queda anotado como trabajo pendiente, no oculto.
+- **Marca COR (watermark)**: Logo / Logo + nombre / Sin marca, las 4 esquinas, y sliders de Tamaño y Opacidad — usando `computeWatermarkLayout` de `@cor/image-processing` (Fase 1) para posicionar el isologo real (Fase 6). El watermark **se hornea en los píxeles reales del archivo exportado** (ver sección 29, agregada tras la verificación inicial de esta fase), no solo se previsualiza.
 
 ## 25. Estado verificado (Fase 12)
 
@@ -218,7 +218,21 @@ Metadatos mostrados: Vehículo (origen cámara/galería), Escenario (la descripc
 - `expo export --platform web` — bundlea sin errores (incluye `@react-native-async-storage/async-storage`).
 - Verificación real en Chromium: estado vacío correcto → se crea y guarda un proyecto real → aparece en el historial con miniatura y metadatos correctos → "Duplicar" crea una segunda entrada independiente → tocar una tarjeta navega a la pantalla real de Resultado con los datos exactos del proyecto → **recarga completa de página (equivalente a relanzar la app) y los 2 proyectos siguen ahí**, confirmando que la persistencia es real en disco y no solo en memoria. Sin errores de consola.
 
-## 28. Próximas fases (según el plan acordado)
+## 29. Marca de agua horneada en el archivo exportado (mejora sobre la Fase 12)
+
+Pendiente que quedó anotado explícitamente al cerrar la Fase 12: el watermark solo se veía en la vista previa, no en el archivo descargado. Se implementó a petición explícita:
+
+- **Técnica**: `react-native-view-shot` monta, fuera de la pantalla visible, la imagen ya recortada (salida de `exportImageToSpec`) más el logo real posicionado con la misma lógica de `computeWatermarkLayout`/`computeWatermarkBox` que usa la vista previa, y rasteriza esa composición a un PNG sin pérdida exactamente en la resolución del formato elegido (`captureRef({ width: spec.width, height: spec.height, format: 'png' }`). Después, `reencodeImage` (nuevo, en `apps/mobile/src/lib/exportImage.ts`) usa `expo-image-manipulator` para convertir ese PNG al formato/calidad final que el usuario pidió (JPG/PNG/WebP) — separar la captura (siempre PNG sin pérdida) de la re-codificación evita el límite de `react-native-view-shot`, que en iOS nativo no acepta salida WebP directamente.
+- Funciona igual en web (usa `html2canvas` internamente, dependencia propia de `react-native-view-shot`) y en nativo (captura de vista real), así que se pudo verificar aquí igual que el resto de la app.
+- Cuando la marca es "Sin marca", se salta por completo este paso y se usa el recorte tal cual — no hay costo ni riesgo extra cuando no hay watermark.
+
+## 30. Estado verificado (mejora del watermark horneado)
+
+- `npm run typecheck` — limpio en los 7 workspaces.
+- `expo export --platform web` — bundlea sin errores (incluye `react-native-view-shot`).
+- Verificación real en Chromium: se extrajo el archivo exportado real (no la vista previa) y se confirmó a resolución completa (1080×1080) que el logo COR está compuesto directamente en los píxeles, en la esquina y opacidad elegidas. Se repitió con "Sin marca" (archivo limpio, sin logo) y con la esquina cambiada a "Sup. izquierda" (el logo se mueve correctamente en el archivo final). Sin errores de consola en ninguno de los tres casos.
+
+## 31. Próximas fases (según el plan acordado)
 
 1. ~~Arquitectura~~ ✅
 2. ~~Sistema visual COR~~ ✅

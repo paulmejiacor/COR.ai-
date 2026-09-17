@@ -1,5 +1,6 @@
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { Alert, Image, Pressable, ScrollView, TextInput, View, StyleSheet } from 'react-native';
+import { captureRef } from 'react-native-view-shot';
 import * as Sharing from 'expo-sharing';
 import type { ImageResult } from 'expo-image-manipulator';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
@@ -16,9 +17,32 @@ import {
   useTheme,
 } from '@cor/design-system';
 import { EXPORT_PRESETS, type ExportPresetId, type ExportFileFormat, type WatermarkVariant, type WatermarkCorner } from '@cor/shared-types';
-import { resolveExportSpec, computeWatermarkLayout } from '@cor/image-processing';
+import { resolveExportSpec, computeWatermarkLayout, type WatermarkLayout } from '@cor/image-processing';
 import type { RootStackParamList } from '../navigation/types';
-import { exportImageToSpec } from '../lib/exportImage';
+import { exportImageToSpec, reencodeImage } from '../lib/exportImage';
+
+const CAPTURE_WIDTH = 360;
+
+function computeWatermarkBox(
+  containerWidth: number,
+  containerHeight: number,
+  layout: WatermarkLayout | null,
+  corner: WatermarkCorner
+): { left: number; top: number; width: number; height: number } | null {
+  if (!layout || containerWidth <= 0) return null;
+  const width = containerWidth * layout.widthRatio;
+  const height = width / LOGO_ASPECT_RATIO;
+  const anchorX = containerWidth * layout.xRatio;
+  const anchorY = containerHeight * layout.yRatio;
+  const isRight = corner.includes('right');
+  const isBottom = corner.includes('bottom');
+  return {
+    left: isRight ? anchorX - width : anchorX,
+    top: isBottom ? anchorY - height : anchorY,
+    width,
+    height,
+  };
+}
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Export'>;
 
@@ -69,6 +93,11 @@ export function ExportScreen({ route, navigation }: Props) {
   const [exporting, setExporting] = useState(false);
   const [exported, setExported] = useState<ImageResult | null>(null);
 
+  const [captureImageUri, setCaptureImageUri] = useState<string | null>(null);
+  const [captureSpec, setCaptureSpec] = useState<{ width: number; height: number } | null>(null);
+  const hiddenViewRef = useRef<View>(null);
+  const captureImageLoadResolver = useRef<(() => void) | null>(null);
+
   const watermarkLayout = computeWatermarkLayout({
     variant: watermarkVariant,
     corner: watermarkCorner,
@@ -76,21 +105,9 @@ export function ExportScreen({ route, navigation }: Props) {
     opacity: watermarkOpacity,
   });
 
-  let watermarkBox: { left: number; top: number; width: number; height: number } | null = null;
-  if (watermarkLayout && preview.width > 0) {
-    const width = preview.width * watermarkLayout.widthRatio;
-    const height = width / LOGO_ASPECT_RATIO;
-    const anchorX = preview.width * watermarkLayout.xRatio;
-    const anchorY = preview.height * watermarkLayout.yRatio;
-    const isRight = watermarkCorner.includes('right');
-    const isBottom = watermarkCorner.includes('bottom');
-    watermarkBox = {
-      left: isRight ? anchorX - width : anchorX,
-      top: isBottom ? anchorY - height : anchorY,
-      width,
-      height,
-    };
-  }
+  const watermarkBox = computeWatermarkBox(preview.width, preview.height, watermarkLayout, watermarkCorner);
+  const captureHeight = captureSpec ? CAPTURE_WIDTH * (captureSpec.height / captureSpec.width) : 0;
+  const captureBox = computeWatermarkBox(CAPTURE_WIDTH, captureHeight, watermarkLayout, watermarkCorner);
 
   const handleExport = async () => {
     setExporting(true);
@@ -101,12 +118,39 @@ export function ExportScreen({ route, navigation }: Props) {
           ? { width: parseInt(customWidth, 10) || photoWidth, height: parseInt(customHeight, 10) || photoHeight, format: customFormat }
           : undefined;
       const spec = resolveExportSpec(presetId, custom);
-      const result = await exportImageToSpec(resultImageUri, photoWidth, photoHeight, spec);
-      setExported(result);
+      const cropped = await exportImageToSpec(resultImageUri, photoWidth, photoHeight, spec);
+
+      if (watermarkVariant === 'none') {
+        setExported(cropped);
+        return;
+      }
+
+      // Hornea la marca en los píxeles reales: monta la composición (foto ya
+      // recortada + logo) fuera de la pantalla visible y la rasteriza a la
+      // resolución exacta del formato elegido — no es solo una vista previa.
+      setCaptureSpec({ width: spec.width, height: spec.height });
+      const imageReady = new Promise<void>((resolve) => {
+        captureImageLoadResolver.current = resolve;
+      });
+      setCaptureImageUri(cropped.uri);
+      await imageReady;
+      await new Promise((resolve) => setTimeout(resolve, 50));
+
+      const rawUri = await captureRef(hiddenViewRef, {
+        format: 'png',
+        quality: 1,
+        result: 'tmpfile',
+        width: spec.width,
+        height: spec.height,
+      });
+      const final = await reencodeImage(rawUri, spec.format, spec.quality);
+      setExported(final);
     } catch (error) {
       Alert.alert('No se pudo exportar', String(error));
     } finally {
       setExporting(false);
+      setCaptureImageUri(null);
+      setCaptureSpec(null);
     }
   };
 
@@ -298,6 +342,31 @@ export function ExportScreen({ route, navigation }: Props) {
           </View>
         ) : null}
       </ScrollView>
+
+      <View
+        ref={hiddenViewRef}
+        collapsable={false}
+        style={{ position: 'absolute', left: -9999, top: 0, width: CAPTURE_WIDTH, height: captureHeight || 1 }}
+      >
+        {captureImageUri ? (
+          <Image
+            source={{ uri: captureImageUri }}
+            resizeMode="stretch"
+            style={{ width: CAPTURE_WIDTH, height: captureHeight }}
+            onLoad={() => captureImageLoadResolver.current?.()}
+          />
+        ) : null}
+        {captureBox ? (
+          <View style={[styles.watermarkBox, captureBox, { opacity: watermarkOpacity }]} pointerEvents="none">
+            <Logo height={captureBox.height} tone="light" />
+            {watermarkVariant === 'logo_name' ? (
+              <Text variant="caption" style={styles.watermarkCaption} numberOfLines={1}>
+                AI AUTOMOTIVE STUDIO
+              </Text>
+            ) : null}
+          </View>
+        ) : null}
+      </View>
     </Screen>
   );
 }
