@@ -31,6 +31,10 @@ export type ProcessingParams = CapturedPhotoParams & {
   composition: CompositionSettings;
 };
 
+export type ResultParams = ProcessingParams & {
+  resultImageUri: string;
+};
+
 export type RootStackParamList = {
   Home: undefined;
   NewCreation: undefined;
@@ -40,5 +44,6 @@ export type RootStackParamList = {
   SceneSelection: CapturedPhotoParams;
   CompositionEditor: CompositionEditorParams;
   Processing: ProcessingParams;
+  Result: ResultParams;
   Placeholder: PlaceholderRoute;
 };

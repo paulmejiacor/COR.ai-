@@ -88,11 +88,14 @@ export function ProcessingScreen({ route, navigation }: Props) {
       })
       .then((result) => {
         if (cancelled) return;
-        navigation.replace('Placeholder', {
-          title: 'Resultado',
-          phase: 'Fase 10 — Resultado',
-          photoUri: result.resultImageUri,
-          note: sceneDescription,
+        navigation.replace('Result', {
+          resultImageUri: result.resultImageUri,
+          photoUri,
+          photoWidth,
+          photoHeight,
+          source,
+          sceneDescription,
+          composition,
         });
       });
 

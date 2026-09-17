@@ -161,7 +161,22 @@ Nuevo paquete `packages/design-system` (`@cor/design-system`), consumido por `ap
 - `expo export --platform web` — bundlea sin errores.
 - Verificación real en Chromium: el flujo completo (foto → escenario → composición → "CONTINUAR") dispara la generación, se ven los 6 pasos avanzar en orden con sus checks y la barra de progreso, y al terminar navega solo a "Fase 10 — Resultado" mostrando la imagen. Sin errores de consola.
 
-## 20. Próximas fases (según el plan acordado)
+## 20. Resultado (Fase 10)
+
+`ResultScreen` (ruta `Result`) implementa el dashboard del brief (imagen grande, metadatos, botones). Mezcla intencionalmente dos tipos de botón:
+
+- **Reales, funcionan de verdad hoy**: `Editar` (vuelve al editor de composición), `Regenerar` (vuelve a correr `getAIImageService().generate()` con los mismos datos), `Compartir` (`expo-sharing`, con verificación de disponibilidad y manejo de error), `Guardar` (persiste un `Project` real en `@cor/storage`, la misma pieza definida desde la Fase 1 — esto es lo que la Fase 13 "Mis proyectos" va a leer), y `Crear otra versión` (reutiliza la misma foto del vehículo y abre la selección de escenario de nuevo, sin repetir la captura — la función "mismo vehículo, múltiples spots" del brief).
+- **Placeholder hacia su propia fase**: `Comparar` → Fase 11, `Exportar` → Fase 12, porque son pantallas completas en sí mismas.
+
+Metadatos mostrados: Vehículo (origen cámara/galería), Escenario (la descripción elegida en la Fase 7), Resolución (dimensiones reales de la foto) y Formato (inferido de la URI). Nuevos íconos propios: `edit`, `share`, `save`, `compare`.
+
+## 21. Estado verificado (Fase 10)
+
+- `npm run typecheck` — limpio en los 7 workspaces.
+- `expo export --platform web` — bundlea sin errores (incluye `expo-sharing`).
+- Verificación real en Chromium: tras la generación llega a Resultado con la imagen, los 4 metadatos correctos y la grilla de 6 acciones con sus íconos distintos. `Guardar` y `Compartir` no lanzan errores. Importante: `Alert.alert` (usado para confirmar Guardar/errores) es una API nativa de React Native que no tiene equivalente real en `react-native-web` — en este navegador de pruebas no aparece el diálogo visualmente, pero en el teléfono del usuario (iOS/Android reales) sí es un alert nativo funcional; no se pudo verificar el diálogo en sí en este entorno, solo que la lógica no falla.
+
+## 22. Próximas fases (según el plan acordado)
 
 1. ~~Arquitectura~~ ✅
 2. ~~Sistema visual COR~~ ✅
@@ -172,10 +187,10 @@ Nuevo paquete `packages/design-system` (`@cor/design-system`), consumido por `ap
 7. ~~Selección de escenario~~ ✅
 8. ~~Editor de composición~~ ✅
 9. ~~Pantalla de procesamiento~~ ✅
-10. Resultado
+10. ~~Resultado~~ ✅
 11. Comparador antes/después
 12. Exportación
 13. Historial ("Mis proyectos")
 14. Preparación de integración real de IA
 
-No se avanza a la Fase 10 hasta confirmación.
+No se avanza a la Fase 11 hasta confirmación.

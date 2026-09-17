@@ -14,7 +14,11 @@ export type IconName =
   | 'refresh'
   | 'plusCircle'
   | 'minusCircle'
-  | 'check';
+  | 'check'
+  | 'edit'
+  | 'share'
+  | 'save'
+  | 'compare';
 
 export interface IconProps {
   name: IconName;
@@ -104,6 +108,25 @@ export function Icon({ name, size = 22, color }: IconProps) {
       )}
 
       {name === 'check' && <Path d="M4 12l5 5L20 6" {...common} />}
+
+      {name === 'edit' && <Path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z" {...common} />}
+
+      {name === 'share' && (
+        <>
+          <Path d="M12 3v12M8 7l4-4 4 4" {...common} />
+          <Path d="M5 13v6a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-6" {...common} />
+        </>
+      )}
+
+      {name === 'save' && <Path d="M6 3h12a1 1 0 0 1 1 1v17l-7-4-7 4V4a1 1 0 0 1 1-1z" {...common} />}
+
+      {name === 'compare' && (
+        <>
+          <Rect x={3} y={4} width={18} height={16} rx={2} {...common} />
+          <Line x1={12} y1={4} x2={12} y2={20} {...common} />
+          <Circle cx={12} cy={12} r={2} fill={stroke} stroke="none" />
+        </>
+      )}
     </Svg>
   );
 }
