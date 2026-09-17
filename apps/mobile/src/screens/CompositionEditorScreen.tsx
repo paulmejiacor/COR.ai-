@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { View, Image, ScrollView, StyleSheet, type LayoutChangeEvent } from 'react-native';
+import { useEffect, useRef, useState } from 'react';
+import { View, Image, ScrollView, PanResponder, StyleSheet, type LayoutChangeEvent, type GestureResponderEvent } from 'react-native';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { Screen, Header, Text, SectionLabel, Button, Slider, SegmentedControl, useTheme } from '@cor/design-system';
 import { computeVehicleTransform } from '@cor/image-processing';
@@ -8,20 +8,125 @@ import type { RootStackParamList } from '../navigation/types';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'CompositionEditor'>;
 
+const SCALE_MIN = 0.5;
+const SCALE_MAX = 2.2;
+
 const POSITION_OPTIONS: { value: HorizontalPosition; label: string }[] = [
   { value: 'left', label: 'Izquierda' },
   { value: 'center', label: 'Centro' },
   { value: 'right', label: 'Derecha' },
 ];
 
+const clamp = (v: number, min: number, max: number) => Math.min(max, Math.max(min, v));
+
+function distanceBetween(touches: Array<{ pageX: number; pageY: number }>) {
+  const [a, b] = touches;
+  return Math.hypot(a.pageX - b.pageX, a.pageY - b.pageY);
+}
+
 export function CompositionEditorScreen({ route, navigation }: Props) {
   const { photoUri, photoWidth, photoHeight, source, sceneDescription, sceneThumbnail } = route.params;
   const theme = useTheme();
   const [settings, setSettings] = useState<CompositionSettings>(DEFAULT_COMPOSITION_SETTINGS);
+  const [manualOffset, setManualOffset] = useState({ x: 0, y: 0 });
   const [preview, setPreview] = useState({ width: 0, height: 0 });
+
+  const settingsRef = useRef(settings);
+  useEffect(() => {
+    settingsRef.current = settings;
+  }, [settings]);
+  const manualOffsetRef = useRef(manualOffset);
+  useEffect(() => {
+    manualOffsetRef.current = manualOffset;
+  }, [manualOffset]);
+
+  const gestureRef = useRef<{
+    mode: 'none' | 'pan' | 'pinch';
+    startTouchX: number;
+    startTouchY: number;
+    startOffsetX: number;
+    startOffsetY: number;
+    startDistance: number;
+    startScale: number;
+  }>({ mode: 'none', startTouchX: 0, startTouchY: 0, startOffsetX: 0, startOffsetY: 0, startDistance: 0, startScale: 1 });
 
   const update = <K extends keyof CompositionSettings>(key: K, value: CompositionSettings[K]) =>
     setSettings((prev) => ({ ...prev, [key]: value }));
+
+  const handlePositionChange = (value: HorizontalPosition) => {
+    update('position', value);
+    setManualOffset({ x: 0, y: 0 });
+  };
+
+  const panResponder = useRef(
+    PanResponder.create({
+      onStartShouldSetPanResponder: () => true,
+      onStartShouldSetPanResponderCapture: () => true,
+      onMoveShouldSetPanResponder: () => true,
+      onMoveShouldSetPanResponderCapture: () => true,
+      onPanResponderTerminationRequest: () => false,
+      onPanResponderGrant: (evt: GestureResponderEvent) => {
+        const touches = evt.nativeEvent.touches;
+        if (touches.length >= 2) {
+          gestureRef.current = {
+            mode: 'pinch',
+            startTouchX: 0,
+            startTouchY: 0,
+            startOffsetX: 0,
+            startOffsetY: 0,
+            startDistance: distanceBetween(touches),
+            startScale: settingsRef.current.scale,
+          };
+        } else {
+          gestureRef.current = {
+            mode: 'pan',
+            startTouchX: touches[0].pageX,
+            startTouchY: touches[0].pageY,
+            startOffsetX: manualOffsetRef.current.x,
+            startOffsetY: manualOffsetRef.current.y,
+            startDistance: 0,
+            startScale: 1,
+          };
+        }
+      },
+      onPanResponderMove: (evt: GestureResponderEvent) => {
+        const touches = evt.nativeEvent.touches;
+        const gesture = gestureRef.current;
+
+        if (touches.length >= 2) {
+          if (gesture.mode !== 'pinch') {
+            gestureRef.current = {
+              ...gesture,
+              mode: 'pinch',
+              startDistance: distanceBetween(touches),
+              startScale: settingsRef.current.scale,
+            };
+            return;
+          }
+          const newScale = clamp((gesture.startDistance > 0 ? distanceBetween(touches) / gesture.startDistance : 1) * gesture.startScale, SCALE_MIN, SCALE_MAX);
+          update('scale', newScale);
+        } else if (touches.length === 1) {
+          if (gesture.mode !== 'pan') {
+            gestureRef.current = {
+              ...gesture,
+              mode: 'pan',
+              startTouchX: touches[0].pageX,
+              startTouchY: touches[0].pageY,
+              startOffsetX: manualOffsetRef.current.x,
+              startOffsetY: manualOffsetRef.current.y,
+            };
+            return;
+          }
+          const dx = touches[0].pageX - gesture.startTouchX;
+          const dy = touches[0].pageY - gesture.startTouchY;
+          setManualOffset({ x: gesture.startOffsetX + dx, y: gesture.startOffsetY + dy });
+        }
+      },
+      onPanResponderRelease: () => {
+        gestureRef.current.mode = 'none';
+      },
+    })
+  ).current;
 
   const transform = computeVehicleTransform(settings);
   const vehicleWidth = preview.width * 0.56 * transform.scale;
@@ -55,7 +160,7 @@ export function CompositionEditorScreen({ route, navigation }: Props) {
           Ajusta la composición
         </Text>
         <Text variant="bodySmall" color="secondary" style={{ marginTop: theme.spacing.xs, marginBottom: theme.spacing.lg }}>
-          Estos controles mueven y escalan el vehículo dentro de la escena — nunca lo deforman.
+          Arrastra el vehículo con un dedo o pellizca con dos para moverlo y escalarlo — igual que con los controles de abajo, nunca se deforma.
         </Text>
 
         <View
@@ -70,18 +175,19 @@ export function CompositionEditorScreen({ route, navigation }: Props) {
           ) : null}
 
           {preview.width > 0 ? (
-            <Image
-              source={{ uri: photoUri }}
-              resizeMode="contain"
+            <View
+              {...panResponder.panHandlers}
               style={{
                 position: 'absolute',
                 width: vehicleWidth,
                 height: vehicleHeight,
-                left: preview.width / 2 - vehicleWidth / 2 + transform.translateXRatio * preview.width,
-                top: preview.height / 2 - vehicleHeight / 2 + transform.translateYRatio * preview.height,
+                left: preview.width / 2 - vehicleWidth / 2 + transform.translateXRatio * preview.width + manualOffset.x,
+                top: preview.height / 2 - vehicleHeight / 2 + transform.translateYRatio * preview.height + manualOffset.y,
                 transform: [{ rotate: `${transform.rotationDeg}deg` }],
               }}
-            />
+            >
+              <Image source={{ uri: photoUri }} resizeMode="contain" style={styles.vehicleImage} />
+            </View>
           ) : null}
         </View>
 
@@ -90,15 +196,15 @@ export function CompositionEditorScreen({ route, navigation }: Props) {
             <Text variant="label" color="secondary" uppercase style={{ marginBottom: theme.spacing.sm }}>
               Posición
             </Text>
-            <SegmentedControl options={POSITION_OPTIONS} value={settings.position} onChange={(v) => update('position', v)} />
+            <SegmentedControl options={POSITION_OPTIONS} value={settings.position} onChange={handlePositionChange} />
           </View>
 
           <ControlSlider
             label="Escala"
             valueLabel={`${settings.scale.toFixed(2)}x`}
             value={settings.scale}
-            min={0.6}
-            max={1.4}
+            min={SCALE_MIN}
+            max={SCALE_MAX}
             onChange={(v) => update('scale', v)}
           />
 
@@ -184,6 +290,10 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     bottom: 0,
+  },
+  vehicleImage: {
+    width: '100%',
+    height: '100%',
   },
   sliderHeader: {
     flexDirection: 'row',

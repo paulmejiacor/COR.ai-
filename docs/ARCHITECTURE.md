@@ -139,12 +139,14 @@ Nuevo paquete `packages/design-system` (`@cor/design-system`), consumido por `ap
 - Nuevos componentes de design system, reutilizables en fases futuras: `Slider` (control deslizante propio, sin dependencia nativa) y `SegmentedControl` (genérico, tipado).
 - La vista previa compone la fotografía del vehículo sobre la miniatura del escenario elegido en la Fase 7 (o un fondo neutro si el usuario escribió texto libre sin elegir plantilla).
 - Al continuar, un resumen legible de la composición (posición/escala/rotación/distancia) se agrega a la descripción del escenario y viaja hacia el placeholder de la Fase 9.
+- **Manipulación directa** (pedido por el usuario tras probar la Fase 8): además de los controles, el vehículo se puede arrastrar con un dedo y escalar con pellizco de dos dedos directamente sobre la vista previa, con `PanResponder` detectando 1 vs. 2 toques (sin dependencia nativa de gestos). El arrastre mueve un offset manual que se superpone a la posición elegida en el `SegmentedControl`; tocar un preset de posición reinicia ese offset. El pellizco escribe directamente sobre `settings.scale`, así que el slider de Escala siempre queda sincronizado con lo que se ve.
 
 ## 17. Estado verificado (Fase 8)
 
 - `npm run typecheck` — limpio en los 7 workspaces.
 - `expo export --platform web` — bundlea sin errores.
 - Verificación real en Chromium: arrastrar el slider de Escala cambia el tamaño del vehículo en vivo (probado hasta 1.35x); tocar "Izquierda" lo reposiciona sin deformarlo; arrastrar Rotación lo gira visiblemente (probado a 6°); "CONTINUAR" navega a la Fase 9 con el resumen completo de la composición. Sin errores de consola.
+- Verificación del arrastre directo: simular un drag de mouse sobre el vehículo lo mueve en tiempo real siguiendo el cursor, y tocar un preset de posición después reinicia limpiamente el offset manual. El pellizco de dos dedos no se pudo simular en este entorno headless (no hay multi-touch real), así que su confirmación final queda pendiente de prueba en el teléfono del usuario — la lógica es simétrica a la del arrastre, ya verificada.
 
 ## 18. Próximas fases (según el plan acordado)
 
