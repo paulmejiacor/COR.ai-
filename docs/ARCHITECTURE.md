@@ -94,13 +94,26 @@ Nuevo paquete `packages/design-system` (`@cor/design-system`), consumido por `ap
 
 `NewCreationScreen` (ruta `NewCreation`) es el punto de entrada al que lleva el botón "NUEVA CREACIÓN" de Home. Ofrece exactamente las dos opciones del brief — "Tomar foto" y "Usar galería" — usando el nuevo componente `OptionTile` (icono + título + descripción + chevron, reutilizable en futuras listas de selección como escenarios o plantillas). La captura real de cámara/galería es la Fase 5, así que ambas opciones navegan por ahora al placeholder etiquetado con esa fase. Íconos nuevos en el set propio: `camera`, `image`, `chevronRight`.
 
-## 10. Próximas fases (según el plan acordado)
+## 10. Carga de fotografía real (Fase 5)
+
+- `expo-camera`: `CameraCaptureScreen` (ruta `Camera`) — vista de cámara en vivo a pantalla completa con overlay propio (back button, `CornerBrackets` como guía de encuadre, texto "Encuadra el vehículo completo", botón disparador). Maneja el estado de permiso con `useCameraPermissions` mostrando una pantalla de solicitud si aún no fue concedido, en vez de dejar que el sistema operativo lo resuelva sin contexto.
+- `expo-image-picker`: la opción "Usar galería" en `NewCreationScreen` pide permiso con `requestMediaLibraryPermissionsAsync` y abre el selector nativo con `launchImageLibraryAsync`.
+- Ambos caminos producen un `SourcePhoto` real (`@cor/shared-types`) — no un mock — y navegan al placeholder de la Fase 6 pasándole la URI de la foto. `PlaceholderScreen` ahora sabe mostrar esa previsualización cuando existe, así que el flujo se siente completo aunque la detección del vehículo todavía no esté construida.
+- Permisos declarados en `app.json` (`NSCameraUsageDescription`, `NSPhotoLibraryUsageDescription` en iOS; plugins `expo-camera`/`expo-image-picker` para Android).
+
+## 11. Estado verificado (Fase 5)
+
+- `npm run typecheck` — limpio en los 7 workspaces.
+- `expo export --platform web` — bundlea sin errores (569 módulos).
+- Verificación real en Chromium: **galería** — se seleccionó un archivo real vía el file chooser del navegador y la foto llegó correctamente al placeholder de Fase 6. **Cámara** — con un dispositivo de video simulado (`--use-fake-device-for-media-stream`) el preview en vivo se renderizó (overlay, guía de encuadre, disparador) y `takePictureAsync` capturó un frame real que también llegó al placeholder. Sin errores de consola en ningún caso.
+
+## 12. Próximas fases (según el plan acordado)
 
 1. ~~Arquitectura~~ ✅
 2. ~~Sistema visual COR~~ ✅
 3. ~~Home~~ ✅
 4. ~~Flujo "Nueva Creación"~~ ✅
-5. Carga de fotografía (cámara/galería)
+5. ~~Carga de fotografía (cámara/galería)~~ ✅
 6. Detección del vehículo
 7. Selección de escenario
 8. Editor de composición
@@ -111,4 +124,4 @@ Nuevo paquete `packages/design-system` (`@cor/design-system`), consumido por `ap
 13. Historial ("Mis proyectos")
 14. Preparación de integración real de IA
 
-No se avanza a la Fase 5 hasta confirmación.
+No se avanza a la Fase 6 hasta confirmación.

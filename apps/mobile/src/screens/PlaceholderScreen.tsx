@@ -1,13 +1,13 @@
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { View, StyleSheet } from 'react-native';
+import { View, Image, StyleSheet } from 'react-native';
 import { Screen, Header, Text, SectionLabel, useTheme } from '@cor/design-system';
 import type { RootStackParamList } from '../navigation/types';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Placeholder'>;
 
-/** Destino temporal de los botones de Home cuyo flujo real todavía no se construye en esta fase. */
+/** Destino temporal de los botones cuyo flujo real todavía no se construye en esta fase. */
 export function PlaceholderScreen({ route, navigation }: Props) {
-  const { title, phase } = route.params;
+  const { title, phase, photoUri } = route.params;
   const theme = useTheme();
 
   return (
@@ -18,9 +18,19 @@ export function PlaceholderScreen({ route, navigation }: Props) {
         <Text variant="title" style={{ marginTop: theme.spacing.md }}>
           {title}
         </Text>
-        <Text variant="body" color="secondary" style={{ marginTop: theme.spacing.sm }}>
-          Esta pantalla se construye en una fase posterior del plan acordado.
-        </Text>
+
+        {photoUri ? (
+          <>
+            <Image source={{ uri: photoUri }} style={[styles.preview, { borderRadius: theme.radii.lg, marginTop: theme.spacing.lg }]} />
+            <Text variant="body" color="secondary" style={{ marginTop: theme.spacing.md }}>
+              Fotografía lista. La detección automática del vehículo se construye en una fase posterior del plan acordado.
+            </Text>
+          </>
+        ) : (
+          <Text variant="body" color="secondary" style={{ marginTop: theme.spacing.sm }}>
+            Esta pantalla se construye en una fase posterior del plan acordado.
+          </Text>
+        )}
       </View>
     </Screen>
   );
@@ -29,5 +39,9 @@ export function PlaceholderScreen({ route, navigation }: Props) {
 const styles = StyleSheet.create({
   body: {
     flex: 1,
+  },
+  preview: {
+    width: '100%',
+    aspectRatio: 4 / 3,
   },
 });

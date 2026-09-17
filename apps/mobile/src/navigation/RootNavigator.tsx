@@ -3,6 +3,7 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { useTheme } from '@cor/design-system';
 import { HomeScreen } from '../screens/HomeScreen';
 import { NewCreationScreen } from '../screens/NewCreationScreen';
+import { CameraCaptureScreen } from '../screens/CameraCaptureScreen';
 import { PlaceholderScreen } from '../screens/PlaceholderScreen';
 import type { RootStackParamList } from './types';
 
@@ -29,6 +30,7 @@ export function RootNavigator() {
       <Stack.Navigator screenOptions={{ headerShown: false, contentStyle: { backgroundColor: theme.colors.background } }}>
         <Stack.Screen name="Home" component={HomeScreen} />
         <Stack.Screen name="NewCreation" component={NewCreationScreen} />
+        <Stack.Screen name="Camera" component={CameraCaptureScreen} />
         <Stack.Screen name="Placeholder" component={PlaceholderScreen} />
       </Stack.Navigator>
     </NavigationContainer>

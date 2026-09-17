@@ -7,7 +7,11 @@
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "infoPlist": {
+        "NSCameraUsageDescription": "COR usa la cámara para fotografiar el vehículo que vas a transformar.",
+        "NSPhotoLibraryUsageDescription": "COR necesita acceso a tus fotos para elegir la fotografía del vehículo."
+      }
     },
     "android": {
       "adaptiveIcon": {
@@ -20,6 +24,20 @@
     },
     "web": {
       "favicon": "./assets/favicon.png"
-    }
+    },
+    "plugins": [
+      [
+        "expo-camera",
+        {
+          "cameraPermission": "COR usa la cámara para fotografiar el vehículo que vas a transformar."
+        }
+      ],
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "COR necesita acceso a tus fotos para elegir la fotografía del vehículo."
+        }
+      ]
+    ]
   }
 }
