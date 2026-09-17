@@ -90,12 +90,16 @@ Nuevo paquete `packages/design-system` (`@cor/design-system`), consumido por `ap
 - `npx expo export --platform web` — bundlea correctamente resolviendo todos los paquetes `@cor/*` y `@react-navigation/*` (542 módulos).
 - Verificación visual (Chromium headless, 390×844): Home renderiza según spec; tocar "NUEVA CREACIÓN" navega al placeholder con header, back button y la etiqueta de fase correctas; sin errores de consola.
 
-## 9. Próximas fases (según el plan acordado)
+## 9. Flujo "Nueva Creación" (Fase 4)
+
+`NewCreationScreen` (ruta `NewCreation`) es el punto de entrada al que lleva el botón "NUEVA CREACIÓN" de Home. Ofrece exactamente las dos opciones del brief — "Tomar foto" y "Usar galería" — usando el nuevo componente `OptionTile` (icono + título + descripción + chevron, reutilizable en futuras listas de selección como escenarios o plantillas). La captura real de cámara/galería es la Fase 5, así que ambas opciones navegan por ahora al placeholder etiquetado con esa fase. Íconos nuevos en el set propio: `camera`, `image`, `chevronRight`.
+
+## 10. Próximas fases (según el plan acordado)
 
 1. ~~Arquitectura~~ ✅
 2. ~~Sistema visual COR~~ ✅
 3. ~~Home~~ ✅
-4. Flujo "Nueva Creación"
+4. ~~Flujo "Nueva Creación"~~ ✅
 5. Carga de fotografía (cámara/galería)
 6. Detección del vehículo
 7. Selección de escenario
@@ -107,4 +111,4 @@ Nuevo paquete `packages/design-system` (`@cor/design-system`), consumido por `ap
 13. Historial ("Mis proyectos")
 14. Preparación de integración real de IA
 
-No se avanza a la Fase 4 hasta confirmación.
+No se avanza a la Fase 5 hasta confirmación.

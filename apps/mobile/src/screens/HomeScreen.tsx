@@ -25,11 +25,7 @@ export function HomeScreen({ navigation }: Props) {
         </View>
 
         <View style={styles.actions}>
-          <Button
-            label="NUEVA CREACIÓN"
-            fullWidth
-            onPress={() => openPlaceholder('Nueva creación', 'Fase 4 — Flujo de nueva creación')}
-          />
+          <Button label="NUEVA CREACIÓN" fullWidth onPress={() => navigation.navigate('NewCreation')} />
 
           <View style={[styles.grid, { marginTop: theme.spacing.lg }]}>
             <NavCard

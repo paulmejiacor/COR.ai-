@@ -9,3 +9,4 @@ export * from './Divider';
 export * from './Icon';
 export * from './Header';
 export * from './NavCard';
+export * from './OptionTile';

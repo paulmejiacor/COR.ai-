@@ -1,7 +1,15 @@
 import Svg, { Path, Rect, Circle, Line } from 'react-native-svg';
 import { useTheme } from '../theme';
 
-export type IconName = 'chevronLeft' | 'folder' | 'grid' | 'download' | 'sliders';
+export type IconName =
+  | 'chevronLeft'
+  | 'chevronRight'
+  | 'folder'
+  | 'grid'
+  | 'download'
+  | 'sliders'
+  | 'camera'
+  | 'image';
 
 export interface IconProps {
   name: IconName;
@@ -18,6 +26,8 @@ export function Icon({ name, size = 22, color }: IconProps) {
   return (
     <Svg width={size} height={size} viewBox="0 0 24 24">
       {name === 'chevronLeft' && <Path d="M15 4L7 12L15 20" {...common} />}
+
+      {name === 'chevronRight' && <Path d="M9 4L17 12L9 20" {...common} />}
 
       {name === 'folder' && (
         <Path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7z" {...common} />
@@ -47,6 +57,21 @@ export function Icon({ name, size = 22, color }: IconProps) {
           <Circle cx={16} cy={12} r={2.2} fill={theme.colors.background} stroke={stroke} strokeWidth={1.6} />
           <Line x1={4} y1={18} x2={20} y2={18} {...common} />
           <Circle cx={11} cy={18} r={2.2} fill={theme.colors.background} stroke={stroke} strokeWidth={1.6} />
+        </>
+      )}
+
+      {name === 'camera' && (
+        <>
+          <Path d="M9 5h6l1.5 2.5H19a2 2 0 0 1 2 2V17a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V9.5a2 2 0 0 1 2-2h2.5L9 5z" {...common} />
+          <Circle cx={12} cy={13} r={3.4} {...common} />
+        </>
+      )}
+
+      {name === 'image' && (
+        <>
+          <Rect x={3} y={4} width={18} height={16} rx={2} {...common} />
+          <Circle cx={8.2} cy={9} r={1.4} fill={stroke} stroke="none" />
+          <Path d="M4 17l5.2-5.6a1.4 1.4 0 0 1 2 0L15 15.5l1.6-1.8a1.4 1.4 0 0 1 2.1 0L21 16.5" {...common} />
         </>
       )}
     </Svg>
