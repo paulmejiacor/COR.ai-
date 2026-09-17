@@ -8,6 +8,8 @@ export interface LogoProps {
   /** Alto del isologo en dp; el ancho se deriva de la proporción real del asset. */
   height?: number;
   tone?: LogoTone;
+  /** Se dispara cuando el asset terminó de decodificarse y pintarse — útil para esperar antes de capturar la vista. */
+  onLoad?: () => void;
 }
 
 const SOURCE_WHITE_INK = require('../../assets/brand/cor-logo-white.png');
@@ -22,7 +24,7 @@ const ASPECT_RATIO = LOGO_ASPECT_RATIO;
  * oficial (versiones sólidas en negro y blanco, página "Colorimetría,
  * versiones de color"), nunca deformado ni recoloreado fuera de esa lista.
  */
-export function Logo({ height = 28, tone = 'auto' }: LogoProps) {
+export function Logo({ height = 28, tone = 'auto', onLoad }: LogoProps) {
   const theme = useTheme();
   // Fondo oscuro -> tinta blanca; fondo claro -> tinta negra.
   const resolvedTone: 'light' | 'dark' = tone === 'auto' ? (theme.mode === 'dark' ? 'light' : 'dark') : tone;
@@ -34,6 +36,7 @@ export function Logo({ height = 28, tone = 'auto' }: LogoProps) {
       accessibilityLabel="COR"
       resizeMode="contain"
       style={{ height, width: height * ASPECT_RATIO }}
+      onLoad={onLoad}
     />
   );
 }

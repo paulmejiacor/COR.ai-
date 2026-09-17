@@ -97,6 +97,7 @@ export function ExportScreen({ route, navigation }: Props) {
   const [captureSpec, setCaptureSpec] = useState<{ width: number; height: number } | null>(null);
   const hiddenViewRef = useRef<View>(null);
   const captureImageLoadResolver = useRef<(() => void) | null>(null);
+  const captureLogoLoadResolver = useRef<(() => void) | null>(null);
 
   const watermarkLayout = computeWatermarkLayout({
     variant: watermarkVariant,
@@ -127,14 +128,20 @@ export function ExportScreen({ route, navigation }: Props) {
 
       // Hornea la marca en los píxeles reales: monta la composición (foto ya
       // recortada + logo) en la vista oculta y la rasteriza a la resolución
-      // exacta del formato elegido — no es solo una vista previa.
+      // exacta del formato elegido — no es solo una vista previa. Espera a
+      // que TANTO la foto como el logo terminen de pintarse antes de
+      // capturar: el logo también carga de forma asíncrona, y capturar
+      // antes de tiempo produce un archivo sin la marca.
       setCaptureSpec({ width: spec.width, height: spec.height });
-      const imageReady = new Promise<void>((resolve) => {
+      const baseReady = new Promise<void>((resolve) => {
         captureImageLoadResolver.current = resolve;
       });
+      const logoReady = new Promise<void>((resolve) => {
+        captureLogoLoadResolver.current = resolve;
+      });
       setCaptureImageUri(cropped.uri);
-      await imageReady;
-      await new Promise((resolve) => setTimeout(resolve, 120));
+      await Promise.all([baseReady, logoReady]);
+      await new Promise((resolve) => setTimeout(resolve, 200));
 
       const rawUri = await captureRef(hiddenViewRef, {
         format: 'png',
@@ -192,7 +199,7 @@ export function ExportScreen({ route, navigation }: Props) {
         ) : null}
         {captureBox ? (
           <View style={[styles.watermarkBox, captureBox, { opacity: watermarkOpacity }]} pointerEvents="none">
-            <Logo height={captureBox.height} tone="light" />
+            <Logo height={captureBox.height} tone="light" onLoad={() => captureLogoLoadResolver.current?.()} />
             {watermarkVariant === 'logo_name' ? (
               <Text variant="caption" style={styles.watermarkCaption} numberOfLines={1}>
                 AI AUTOMOTIVE STUDIO
