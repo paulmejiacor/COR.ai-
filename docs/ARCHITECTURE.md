@@ -75,19 +75,26 @@ Nuevo paquete `packages/design-system` (`@cor/design-system`), consumido por `ap
 - **Componentes base**: `Text` (variantes de la escala tipográfica), `Button` (primary/secondary/ghost), `Surface` (tarjeta), `Screen` (contenedor con fondo + safe area), `SectionLabel` (etiqueta mayúscula subrayada, tal como aparece en el manual), `CornerBrackets` (motivo decorativo de esquinas del manual, solo para momentos hero), `Divider`.
 - Tema oscuro como identidad primaria (fondo `Black`/`Moss`, texto `Aloe`), por ser el tratamiento que usa el propio manual en sus páginas de marca.
 
-`App.tsx` ahora es una **pantalla de verificación del sistema visual** (paleta, tipografía, botones, logo) — no es el Home todavía, eso es la Fase 3.
+`App.tsx` en la Fase 2 fue una pantalla de verificación del sistema visual (paleta, tipografía, botones, logo); en la Fase 3 se reemplaza por la navegación real (ver sección 7).
 
-## 7. Estado verificado
+## 7. Home y navegación (Fase 3)
+
+- `@react-navigation/native` + `native-stack` como router. Header nativo desactivado (`headerShown: false`): cada pantalla usa el componente `Header` propio del design system para mantener el look COR consistente (sin la barra nativa de iOS/Android).
+- `apps/mobile/src/navigation/RootNavigator.tsx` define el stack: `Home` y `Placeholder`. `Placeholder` es un destino genérico y reutilizable — muestra el título de la sección y la fase del roadmap en la que se construye su contenido real. Los 5 accesos de Home (Nueva Creación, Mis proyectos, Plantillas, Exportaciones, Configuración) navegan ahí hasta que cada fase construya su pantalla definitiva; así el flujo es "probable" en cada fase sin dejar botones muertos.
+- `HomeScreen` sigue la sección 3 del brief: título/logo, subtítulo "Transforma el escenario. Conserva el auto.", CTA principal "NUEVA CREACIÓN" y una grilla 2×2 de accesos secundarios (Mis proyectos / Plantillas / Exportaciones / Configuración).
+- Nuevos componentes de design system que nacen aquí porque los va a reutilizar toda pantalla futura: `Header` (con back button), `Icon` (set mínimo propio: chevronLeft, folder, grid, download, sliders — sin librería de íconos externa) y `NavCard`.
+
+## 8. Estado verificado
 
 - `npm run typecheck` — pasa en los 7 workspaces (mobile + 6 paquetes).
-- `npx expo export --platform web` — bundlea correctamente resolviendo todos los paquetes `@cor/*` vía symlinks de npm workspaces (283 módulos).
-- Verificación visual: bundle exportado, servido localmente y capturado con Chromium (Playwright) a 390×844 — paleta, tipografía, botones y logo se renderizan como se espera.
+- `npx expo export --platform web` — bundlea correctamente resolviendo todos los paquetes `@cor/*` y `@react-navigation/*` (542 módulos).
+- Verificación visual (Chromium headless, 390×844): Home renderiza según spec; tocar "NUEVA CREACIÓN" navega al placeholder con header, back button y la etiqueta de fase correctas; sin errores de consola.
 
-## 8. Próximas fases (según el plan acordado)
+## 9. Próximas fases (según el plan acordado)
 
 1. ~~Arquitectura~~ ✅
 2. ~~Sistema visual COR~~ ✅
-3. Home
+3. ~~Home~~ ✅
 4. Flujo "Nueva Creación"
 5. Carga de fotografía (cámara/galería)
 6. Detección del vehículo
@@ -100,4 +107,4 @@ Nuevo paquete `packages/design-system` (`@cor/design-system`), consumido por `ap
 13. Historial ("Mis proyectos")
 14. Preparación de integración real de IA
 
-No se avanza a la Fase 3 hasta confirmación.
+No se avanza a la Fase 4 hasta confirmación.

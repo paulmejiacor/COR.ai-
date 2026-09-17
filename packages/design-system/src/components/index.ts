@@ -6,3 +6,6 @@ export * from './Surface';
 export * from './Button';
 export * from './Screen';
 export * from './Divider';
+export * from './Icon';
+export * from './Header';
+export * from './NavCard';
