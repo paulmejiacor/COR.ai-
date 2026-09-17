@@ -4,6 +4,8 @@ import { useTheme } from '@cor/design-system';
 import { HomeScreen } from '../screens/HomeScreen';
 import { NewCreationScreen } from '../screens/NewCreationScreen';
 import { CameraCaptureScreen } from '../screens/CameraCaptureScreen';
+import { DetectionScreen } from '../screens/DetectionScreen';
+import { MaskReviewScreen } from '../screens/MaskReviewScreen';
 import { PlaceholderScreen } from '../screens/PlaceholderScreen';
 import type { RootStackParamList } from './types';
 
@@ -31,6 +33,8 @@ export function RootNavigator() {
         <Stack.Screen name="Home" component={HomeScreen} />
         <Stack.Screen name="NewCreation" component={NewCreationScreen} />
         <Stack.Screen name="Camera" component={CameraCaptureScreen} />
+        <Stack.Screen name="Detection" component={DetectionScreen} />
+        <Stack.Screen name="MaskReview" component={MaskReviewScreen} />
         <Stack.Screen name="Placeholder" component={PlaceholderScreen} />
       </Stack.Navigator>
     </NavigationContainer>

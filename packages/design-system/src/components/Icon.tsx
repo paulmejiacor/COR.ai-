@@ -9,7 +9,12 @@ export type IconName =
   | 'download'
   | 'sliders'
   | 'camera'
-  | 'image';
+  | 'image'
+  | 'undo'
+  | 'refresh'
+  | 'plusCircle'
+  | 'minusCircle'
+  | 'check';
 
 export interface IconProps {
   name: IconName;
@@ -74,6 +79,31 @@ export function Icon({ name, size = 22, color }: IconProps) {
           <Path d="M4 17l5.2-5.6a1.4 1.4 0 0 1 2 0L15 15.5l1.6-1.8a1.4 1.4 0 0 1 2.1 0L21 16.5" {...common} />
         </>
       )}
+
+      {name === 'undo' && <Path d="M7 7L3 11l4 4M3 11h11a6 6 0 0 1 0 12h-4" {...common} />}
+
+      {name === 'refresh' && (
+        <>
+          <Path d="M4 12a8 8 0 0 1 13.5-5.5M17.5 3v4h-4" {...common} />
+          <Path d="M20 12a8 8 0 0 1-13.5 5.5M6.5 21v-4h4" {...common} />
+        </>
+      )}
+
+      {name === 'plusCircle' && (
+        <>
+          <Circle cx={12} cy={12} r={9} {...common} />
+          <Path d="M12 8v8M8 12h8" {...common} />
+        </>
+      )}
+
+      {name === 'minusCircle' && (
+        <>
+          <Circle cx={12} cy={12} r={9} {...common} />
+          <Path d="M8 12h8" {...common} />
+        </>
+      )}
+
+      {name === 'check' && <Path d="M4 12l5 5L20 6" {...common} />}
     </Svg>
   );
 }

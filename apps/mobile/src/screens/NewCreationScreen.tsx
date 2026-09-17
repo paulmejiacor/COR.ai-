@@ -4,11 +4,8 @@ import * as ImagePicker from 'expo-image-picker';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { Screen, Header, Text, SectionLabel, OptionTile, useTheme } from '@cor/design-system';
 import type { RootStackParamList } from '../navigation/types';
-import type { SourcePhoto } from '@cor/shared-types';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'NewCreation'>;
-
-let photoCounter = 0;
 
 /**
  * Fase 4 — punto de entrada del flujo de creación: elegir el origen de la
@@ -19,13 +16,6 @@ export function NewCreationScreen({ navigation }: Props) {
   const theme = useTheme();
   const [pickingGallery, setPickingGallery] = useState(false);
   const [galleryError, setGalleryError] = useState<string | null>(null);
-
-  const goToDetection = (photo: SourcePhoto) =>
-    navigation.navigate('Placeholder', {
-      title: 'Foto seleccionada',
-      phase: 'Fase 6 — Detección del vehículo',
-      photoUri: photo.uri,
-    });
 
   const handleGallery = async () => {
     setGalleryError(null);
@@ -44,12 +34,10 @@ export function NewCreationScreen({ navigation }: Props) {
       if (result.canceled || result.assets.length === 0) return;
 
       const asset = result.assets[0];
-      goToDetection({
-        id: `photo_${Date.now()}_${photoCounter++}`,
-        uri: asset.uri,
-        width: asset.width,
-        height: asset.height,
-        capturedAt: new Date().toISOString(),
+      navigation.navigate('Detection', {
+        photoUri: asset.uri,
+        photoWidth: asset.width,
+        photoHeight: asset.height,
         source: 'gallery',
       });
     } finally {

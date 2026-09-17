@@ -12,7 +12,7 @@ export interface SourcePhoto {
 export type MaskEditOp =
   | { type: 'add'; pathId: string }
   | { type: 'remove'; pathId: string }
-  | { type: 'restore'; pathId: string }
+  | { type: 'restore' }
   | { type: 'undo' };
 
 /** Result of isolating the vehicle from its background. */

@@ -4,11 +4,8 @@ import { CameraView, useCameraPermissions } from 'expo-camera';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { Screen, Text, Button, Icon, CornerBrackets, useTheme } from '@cor/design-system';
 import type { RootStackParamList } from '../navigation/types';
-import type { SourcePhoto } from '@cor/shared-types';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Camera'>;
-
-let photoCounter = 0;
 
 export function CameraCaptureScreen({ navigation }: Props) {
   const theme = useTheme();
@@ -23,19 +20,11 @@ export function CameraCaptureScreen({ navigation }: Props) {
       const photo = await cameraRef.current.takePictureAsync({ quality: 0.9 });
       if (!photo) return;
 
-      const sourcePhoto: SourcePhoto = {
-        id: `photo_${Date.now()}_${photoCounter++}`,
-        uri: photo.uri,
-        width: photo.width,
-        height: photo.height,
-        capturedAt: new Date().toISOString(),
+      navigation.replace('Detection', {
+        photoUri: photo.uri,
+        photoWidth: photo.width,
+        photoHeight: photo.height,
         source: 'camera',
-      };
-
-      navigation.replace('Placeholder', {
-        title: 'Foto capturada',
-        phase: 'Fase 6 — Detección del vehículo',
-        photoUri: sourcePhoto.uri,
       });
     } finally {
       setCapturing(false);

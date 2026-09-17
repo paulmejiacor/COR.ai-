@@ -107,14 +107,27 @@ Nuevo paquete `packages/design-system` (`@cor/design-system`), consumido por `ap
 - `expo export --platform web` — bundlea sin errores (569 módulos).
 - Verificación real en Chromium: **galería** — se seleccionó un archivo real vía el file chooser del navegador y la foto llegó correctamente al placeholder de Fase 6. **Cámara** — con un dispositivo de video simulado (`--use-fake-device-for-media-stream`) el preview en vivo se renderizó (overlay, guía de encuadre, disparador) y `takePictureAsync` capturó un frame real que también llegó al placeholder. Sin errores de consola en ningún caso.
 
-## 12. Próximas fases (según el plan acordado)
+## 12. Detección del vehículo (Fase 6)
+
+- `DetectionScreen` (ruta `Detection`): pantalla de preparación. Llama a `getAIImageService().detectVehicle(photo)` — hoy el mock, mañana el proveedor real, sin cambiar esta pantalla. Mientras responde muestra "Analizando vehículo..." con un pulso animado sobre `CornerBrackets`; al resolver muestra "Vehículo detectado", el porcentaje de confianza y una previsualización tipo spotlight (la zona detectada se resalta, el resto se atenúa) — es una heurística visual, no segmentación real por píxel, ya que el proveedor de IA todavía es un mock.
+- `MaskReviewScreen` (ruta `MaskReview`, abierta desde "Revisar selección"): corrección manual real de la máscara con las 4 herramientas del brief — **Agregar área** / **Eliminar área** (dibujo a mano alzada con `PanResponder` + `react-native-svg`, un color por modo), **Deshacer** (quita el último trazo) y **Restaurar** (limpia todos). El trazo en sí es una interacción real, no simulada — lo único mock sigue siendo la máscara automática de fondo que se corrige.
+- `MaskEditOp` (`@cor/shared-types`) se ajustó: `restore` ya no pide un `pathId` (es un reinicio completo, no restaurar una región puntual).
+- Bug encontrado y corregido durante la verificación: el `<Svg>` de la máscara no tenía `width`/`height` explícitos, así que el navegador le aplicaba el tamaño por defecto de un `<svg>` (300×150) en vez de llenar el marco — los trazos se creaban pero no se veían. Se corrigió pasando `width="100%" height="100%"` al componente.
+
+## 13. Estado verificado (Fase 6)
+
+- `npm run typecheck` — limpio en los 7 workspaces.
+- `expo export --platform web` — bundlea sin errores.
+- Verificación real en Chromium: foto real (galería) → "Analizando vehículo..." → "Vehículo detectado" con el spotlight y confianza (97%) → "Revisar selección" → se dibujaron trazos reales de agregar (verde) y quitar (rojo), el contador de correcciones se actualizó, y "Deshacer" quitó el último trazo correctamente. Sin errores de consola.
+
+## 14. Próximas fases (según el plan acordado)
 
 1. ~~Arquitectura~~ ✅
 2. ~~Sistema visual COR~~ ✅
 3. ~~Home~~ ✅
 4. ~~Flujo "Nueva Creación"~~ ✅
 5. ~~Carga de fotografía (cámara/galería)~~ ✅
-6. Detección del vehículo
+6. ~~Detección del vehículo~~ ✅
 7. Selección de escenario
 8. Editor de composición
 9. Pantalla de procesamiento
@@ -124,4 +137,4 @@ Nuevo paquete `packages/design-system` (`@cor/design-system`), consumido por `ap
 13. Historial ("Mis proyectos")
 14. Preparación de integración real de IA
 
-No se avanza a la Fase 6 hasta confirmación.
+No se avanza a la Fase 7 hasta confirmación.
