@@ -126,15 +126,15 @@ export function ExportScreen({ route, navigation }: Props) {
       }
 
       // Hornea la marca en los píxeles reales: monta la composición (foto ya
-      // recortada + logo) fuera de la pantalla visible y la rasteriza a la
-      // resolución exacta del formato elegido — no es solo una vista previa.
+      // recortada + logo) en la vista oculta y la rasteriza a la resolución
+      // exacta del formato elegido — no es solo una vista previa.
       setCaptureSpec({ width: spec.width, height: spec.height });
       const imageReady = new Promise<void>((resolve) => {
         captureImageLoadResolver.current = resolve;
       });
       setCaptureImageUri(cropped.uri);
       await imageReady;
-      await new Promise((resolve) => setTimeout(resolve, 50));
+      await new Promise((resolve) => setTimeout(resolve, 120));
 
       const rawUri = await captureRef(hiddenViewRef, {
         format: 'png',
@@ -170,6 +170,38 @@ export function ExportScreen({ route, navigation }: Props) {
 
   return (
     <Screen padded={false}>
+      {/*
+        Vista de captura oculta: se pinta PRIMERO, dentro de los límites reales
+        de la pantalla (no fuera de ella), para que el Header y el ScrollView
+        que vienen después la tapen visualmente. Posicionarla fuera de los
+        límites de la pantalla hace que algunos dispositivos Android/iOS no
+        la rendericen en absoluto, dejando la captura en blanco.
+      */}
+      <View
+        ref={hiddenViewRef}
+        collapsable={false}
+        style={{ position: 'absolute', top: 0, left: 0, width: CAPTURE_WIDTH, height: captureHeight || 1 }}
+      >
+        {captureImageUri ? (
+          <Image
+            source={{ uri: captureImageUri }}
+            resizeMode="stretch"
+            style={{ width: CAPTURE_WIDTH, height: captureHeight }}
+            onLoad={() => captureImageLoadResolver.current?.()}
+          />
+        ) : null}
+        {captureBox ? (
+          <View style={[styles.watermarkBox, captureBox, { opacity: watermarkOpacity }]} pointerEvents="none">
+            <Logo height={captureBox.height} tone="light" />
+            {watermarkVariant === 'logo_name' ? (
+              <Text variant="caption" style={styles.watermarkCaption} numberOfLines={1}>
+                AI AUTOMOTIVE STUDIO
+              </Text>
+            ) : null}
+          </View>
+        ) : null}
+      </View>
+
       <View style={{ paddingHorizontal: theme.spacing.xl }}>
         <Header title="Exportar" onBack={() => navigation.goBack()} />
       </View>
@@ -342,31 +374,6 @@ export function ExportScreen({ route, navigation }: Props) {
           </View>
         ) : null}
       </ScrollView>
-
-      <View
-        ref={hiddenViewRef}
-        collapsable={false}
-        style={{ position: 'absolute', left: -9999, top: 0, width: CAPTURE_WIDTH, height: captureHeight || 1 }}
-      >
-        {captureImageUri ? (
-          <Image
-            source={{ uri: captureImageUri }}
-            resizeMode="stretch"
-            style={{ width: CAPTURE_WIDTH, height: captureHeight }}
-            onLoad={() => captureImageLoadResolver.current?.()}
-          />
-        ) : null}
-        {captureBox ? (
-          <View style={[styles.watermarkBox, captureBox, { opacity: watermarkOpacity }]} pointerEvents="none">
-            <Logo height={captureBox.height} tone="light" />
-            {watermarkVariant === 'logo_name' ? (
-              <Text variant="caption" style={styles.watermarkCaption} numberOfLines={1}>
-                AI AUTOMOTIVE STUDIO
-              </Text>
-            ) : null}
-          </View>
-        ) : null}
-      </View>
     </Screen>
   );
 }
