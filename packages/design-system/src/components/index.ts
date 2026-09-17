@@ -12,3 +12,4 @@ export * from './NavCard';
 export * from './OptionTile';
 export * from './Slider';
 export * from './SegmentedControl';
+export * from './BeforeAfterSlider';

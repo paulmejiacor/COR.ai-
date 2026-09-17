@@ -176,7 +176,18 @@ Metadatos mostrados: Vehículo (origen cámara/galería), Escenario (la descripc
 - `expo export --platform web` — bundlea sin errores (incluye `expo-sharing`).
 - Verificación real en Chromium: tras la generación llega a Resultado con la imagen, los 4 metadatos correctos y la grilla de 6 acciones con sus íconos distintos. `Guardar` y `Compartir` no lanzan errores. Importante: `Alert.alert` (usado para confirmar Guardar/errores) es una API nativa de React Native que no tiene equivalente real en `react-native-web` — en este navegador de pruebas no aparece el diálogo visualmente, pero en el teléfono del usuario (iOS/Android reales) sí es un alert nativo funcional; no se pudo verificar el diálogo en sí en este entorno, solo que la lógica no falla.
 
-## 22. Próximas fases (según el plan acordado)
+## 22. Comparador antes/después (Fase 11)
+
+- `BeforeAfterSlider` (design system): componente interactivo genérico — imagen "after" de base, imagen "before" recortada por un contenedor cuyo ancho sigue la posición del arrastre (0–1), sin reescalar ninguna de las dos imágenes (efecto "revelar", no "zoom"). Línea divisoria + grip circular con doble chevron, badges "ANTES"/"DESPUÉS" fijos en las esquinas. Un solo `PanResponder` sobre todo el contenedor, así que se puede arrastrar desde cualquier punto, no solo desde el grip.
+- `CompareScreen` (ruta `Compare`): usa el slider con la foto original (`photoUri`) como "antes" y el resultado (`resultImageUri`) como "después", con la proporción real de la foto. El botón "Comparar" de la Fase 10 ya no es un placeholder — navega aquí de verdad.
+
+## 23. Estado verificado (Fase 11)
+
+- `npm run typecheck` — limpio en los 7 workspaces.
+- `expo export --platform web` — bundlea sin errores.
+- Verificación real en Chromium: arrastrar desde el centro hasta ~20% del ancho mueve el grip y la línea divisoria exactamente hasta ese punto, revelando más o menos de la imagen "antes" en tiempo real. Sin errores de consola.
+
+## 24. Próximas fases (según el plan acordado)
 
 1. ~~Arquitectura~~ ✅
 2. ~~Sistema visual COR~~ ✅
@@ -188,9 +199,9 @@ Metadatos mostrados: Vehículo (origen cámara/galería), Escenario (la descripc
 8. ~~Editor de composición~~ ✅
 9. ~~Pantalla de procesamiento~~ ✅
 10. ~~Resultado~~ ✅
-11. Comparador antes/después
+11. ~~Comparador antes/después~~ ✅
 12. Exportación
 13. Historial ("Mis proyectos")
 14. Preparación de integración real de IA
 
-No se avanza a la Fase 11 hasta confirmación.
+No se avanza a la Fase 12 hasta confirmación.

@@ -124,7 +124,11 @@ export function ResultScreen({ route, navigation }: Props) {
         <View style={[styles.grid, { marginTop: theme.spacing.md }]}>
           <NavCard icon="edit" label="Editar" onPress={() => navigation.goBack()} />
           <NavCard icon="refresh" label="Regenerar" onPress={handleRegenerate} />
-          <NavCard icon="compare" label="Comparar" onPress={() => goToPlaceholder('Comparar', 'Fase 11 — Comparador antes/después')} />
+          <NavCard
+            icon="compare"
+            label="Comparar"
+            onPress={() => navigation.navigate('Compare', { beforeUri: photoUri, afterUri: resultImageUri, photoWidth, photoHeight })}
+          />
           <NavCard icon="download" label="Exportar" onPress={() => goToPlaceholder('Exportar', 'Fase 12 — Exportación')} />
           <NavCard icon="share" label="Compartir" onPress={handleShare} />
           <NavCard icon="save" label="Guardar" onPress={handleSave} />

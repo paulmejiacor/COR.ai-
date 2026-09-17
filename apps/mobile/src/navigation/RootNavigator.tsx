@@ -10,6 +10,7 @@ import { SceneSelectionScreen } from '../screens/SceneSelectionScreen';
 import { CompositionEditorScreen } from '../screens/CompositionEditorScreen';
 import { ProcessingScreen } from '../screens/ProcessingScreen';
 import { ResultScreen } from '../screens/ResultScreen';
+import { CompareScreen } from '../screens/CompareScreen';
 import { PlaceholderScreen } from '../screens/PlaceholderScreen';
 import type { RootStackParamList } from './types';
 
@@ -43,6 +44,7 @@ export function RootNavigator() {
         <Stack.Screen name="CompositionEditor" component={CompositionEditorScreen} />
         <Stack.Screen name="Processing" component={ProcessingScreen} />
         <Stack.Screen name="Result" component={ResultScreen} />
+        <Stack.Screen name="Compare" component={CompareScreen} />
         <Stack.Screen name="Placeholder" component={PlaceholderScreen} />
       </Stack.Navigator>
     </NavigationContainer>

@@ -35,6 +35,13 @@ export type ResultParams = ProcessingParams & {
   resultImageUri: string;
 };
 
+export type CompareParams = {
+  beforeUri: string;
+  afterUri: string;
+  photoWidth: number;
+  photoHeight: number;
+};
+
 export type RootStackParamList = {
   Home: undefined;
   NewCreation: undefined;
@@ -45,5 +52,6 @@ export type RootStackParamList = {
   CompositionEditor: CompositionEditorParams;
   Processing: ProcessingParams;
   Result: ResultParams;
+  Compare: CompareParams;
   Placeholder: PlaceholderRoute;
 };
