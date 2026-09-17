@@ -156,8 +156,15 @@ export function CompositionEditorScreen({ route, navigation }: Props) {
   ).current;
 
   const transform = computeVehicleTransform(settings);
-  const vehicleWidth = preview.width * 0.56 * transform.scale;
-  const vehicleHeight = vehicleWidth * (photoHeight / photoWidth);
+  // El vehículo debe caber tanto en ancho como en alto dentro del escenario:
+  // una foto en vertical dentro de un escenario panorámico, calculada solo a
+  // partir del ancho, se sale del recuadro por arriba y abajo (recortada por
+  // "overflow: hidden") dejando ver solo una franja del fondo.
+  const photoAspectRatio = photoWidth / photoHeight;
+  const widthCap = preview.width * 0.56 * transform.scale;
+  const heightCap = preview.height * 0.72 * transform.scale;
+  const vehicleWidth = Math.min(widthCap, heightCap * photoAspectRatio);
+  const vehicleHeight = vehicleWidth / photoAspectRatio;
 
   const onPreviewLayout = (e: LayoutChangeEvent) => {
     const { width, height } = e.nativeEvent.layout;
