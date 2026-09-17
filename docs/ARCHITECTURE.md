@@ -65,16 +65,28 @@ Ya definidos en `shared-types` sin backend real todavía:
 
 Cuando exista backend, `storage` y `auth` pasan de mock a clientes HTTP/SDK sin cambiar el resto de la app.
 
-## 6. Estado verificado
+## 6. Sistema visual COR (Fase 2)
 
-- `npm run typecheck` — pasa en los 6 workspaces (mobile + 5 paquetes).
-- `npx expo export --platform web` — bundlea correctamente resolviendo los paquetes `@cor/*` vía symlinks de npm workspaces.
-- `App.tsx` de `apps/mobile` es un placeholder mínimo (sin sistema visual todavía) que confirma en runtime que `auth`, `storage` y `ai-image-service` responden correctamente.
+Nuevo paquete `packages/design-system` (`@cor/design-system`), consumido por `apps/mobile`:
 
-## 7. Próximas fases (según el plan acordado)
+- **Tokens** (`src/tokens`): paleta oficial (`brand`), tema oscuro/claro derivado semánticamente (nunca colores nuevos), escala de espaciado/radios, escala tipográfica.
+- **Tipografía**: Proxima Nova Alt (la del manual) no está disponible como archivo licenciado en este entorno; se usa **Plus Jakarta Sans** como sustituto temporal (geometría y calidez cercanas). Cambiar a la fuente real es editar `tokens/typography.ts` — ningún componente depende del nombre de la fuente directamente.
+- **Logo**: `packages/design-system/src/components/Logo.tsx` es una **reconstrucción provisional** del isologo (no existe el vectorial oficial en el repo). Sigue la propia lógica de construcción del manual: el símbolo ∞ ("intervención tipográfica") dibujado en SVG + la "R" ("tipografía principal") en la fuente del sistema con el peso más pesado. Debe reemplazarse por el asset oficial (.svg/.ai exportado) en cuanto el equipo de marca lo entregue — está aislado en un único componente para que ese reemplazo sea trivial.
+- **Componentes base**: `Text` (variantes de la escala tipográfica), `Button` (primary/secondary/ghost), `Surface` (tarjeta), `Screen` (contenedor con fondo + safe area), `SectionLabel` (etiqueta mayúscula subrayada, tal como aparece en el manual), `CornerBrackets` (motivo decorativo de esquinas del manual, solo para momentos hero), `Divider`.
+- Tema oscuro como identidad primaria (fondo `Black`/`Moss`, texto `Aloe`), por ser el tratamiento que usa el propio manual en sus páginas de marca.
+
+`App.tsx` ahora es una **pantalla de verificación del sistema visual** (paleta, tipografía, botones, logo) — no es el Home todavía, eso es la Fase 3.
+
+## 7. Estado verificado
+
+- `npm run typecheck` — pasa en los 7 workspaces (mobile + 6 paquetes).
+- `npx expo export --platform web` — bundlea correctamente resolviendo todos los paquetes `@cor/*` vía symlinks de npm workspaces (283 módulos).
+- Verificación visual: bundle exportado, servido localmente y capturado con Chromium (Playwright) a 390×844 — paleta, tipografía, botones y logo se renderizan como se espera.
+
+## 8. Próximas fases (según el plan acordado)
 
 1. ~~Arquitectura~~ ✅
-2. Sistema visual COR (colores, tipografía, componentes base) — a partir del manual de marca
+2. ~~Sistema visual COR~~ ✅
 3. Home
 4. Flujo "Nueva Creación"
 5. Carga de fotografía (cámara/galería)
@@ -88,4 +100,4 @@ Cuando exista backend, `storage` y `auth` pasan de mock a clientes HTTP/SDK sin 
 13. Historial ("Mis proyectos")
 14. Preparación de integración real de IA
 
-No se avanza a la Fase 2 hasta confirmación.
+No se avanza a la Fase 3 hasta confirmación.

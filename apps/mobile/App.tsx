@@ -1,78 +1,187 @@
-import { useEffect, useState } from 'react';
+import { ScrollView, StyleSheet, View } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, Text, View } from 'react-native';
+import {
+  useFonts,
+  PlusJakartaSans_400Regular,
+  PlusJakartaSans_500Medium,
+  PlusJakartaSans_600SemiBold,
+  PlusJakartaSans_700Bold,
+  PlusJakartaSans_800ExtraBold,
+} from '@expo-google-fonts/plus-jakarta-sans';
+import {
+  ThemeProvider,
+  useTheme,
+  Screen,
+  Text,
+  SectionLabel,
+  CornerBrackets,
+  Logo,
+  Surface,
+  Button,
+  Divider,
+  brand,
+  typeScale,
+} from '@cor/design-system';
 
-import { getAuthService } from '@cor/auth';
-import { getStorageService } from '@cor/storage';
-import { getAIImageService } from '@cor/ai-image-service';
-import type { User } from '@cor/shared-types';
+const COLOR_SWATCHES = Object.entries(brand) as Array<[string, string]>;
+const TYPE_VARIANTS = Object.keys(typeScale) as Array<keyof typeof typeScale>;
 
 /**
- * Fase 1 placeholder: proves the monorepo wiring works end-to-end
- * (mobile app -> auth / storage / ai-image-service packages) before any
- * COR visual design (Fase 2) or real screens (Fase 3+) are built.
+ * Fase 2 — vista de verificación del sistema visual COR.
+ * No es el Home (eso es Fase 3): existe solo para validar tokens,
+ * tipografía, logo y componentes base antes de construir pantallas reales.
  */
-export default function App() {
-  const [user, setUser] = useState<User | null>(null);
-  const [projectCount, setProjectCount] = useState<number | null>(null);
-  const [providerReady, setProviderReady] = useState(false);
-
-  useEffect(() => {
-    (async () => {
-      const auth = getAuthService();
-      const storage = getStorageService();
-      const ai = getAIImageService();
-
-      const [currentUser, projects] = await Promise.all([
-        auth.getCurrentUser(),
-        storage.listProjects(),
-      ]);
-
-      setUser(currentUser);
-      setProjectCount(projects.length);
-      setProviderReady(Boolean(ai));
-    })();
-  }, []);
+function DesignSystemPreview() {
+  const theme = useTheme();
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>COR AI AUTOMOTIVE STUDIO</Text>
-      <Text style={styles.subtitle}>Fase 1 — Arquitectura</Text>
-      <View style={styles.statusBlock}>
-        <Text style={styles.statusLine}>Auth service: {user ? `OK (${user.name})` : 'cargando...'}</Text>
-        <Text style={styles.statusLine}>Storage service: {projectCount === null ? 'cargando...' : `OK (${projectCount} proyectos)`}</Text>
-        <Text style={styles.statusLine}>AI image service: {providerReady ? 'OK (mock provider)' : 'cargando...'}</Text>
-      </View>
-      <StatusBar style="auto" />
-    </View>
+    <Screen>
+      <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
+        <View style={styles.hero}>
+          <CornerBrackets size={22} thickness={5} />
+          <Logo height={30} />
+          <Text variant="caption" color="secondary" style={styles.heroCaption}>
+            Sistema visual — Fase 2
+          </Text>
+          <Text variant="display" style={styles.heroTitle}>
+            Transforma el escenario.{'\n'}Conserva el auto.
+          </Text>
+        </View>
+
+        <Divider />
+
+        <SectionLabel>Paleta de marca</SectionLabel>
+        <View style={styles.swatchGrid}>
+          {COLOR_SWATCHES.map(([name, hex]) => (
+            <View key={name} style={styles.swatchItem}>
+              <View style={[styles.swatch, { backgroundColor: hex, borderColor: theme.colors.border }]} />
+              <Text variant="caption" uppercase color="secondary">
+                {name}
+              </Text>
+              <Text variant="caption" color="secondary">
+                {hex}
+              </Text>
+            </View>
+          ))}
+        </View>
+
+        <Divider />
+
+        <SectionLabel>Tipografía</SectionLabel>
+        <Surface style={styles.typeSurface}>
+          {TYPE_VARIANTS.map((variant) => (
+            <Text key={variant} variant={variant} style={styles.typeSample}>
+              {variant} — COR Automotive Studio
+            </Text>
+          ))}
+        </Surface>
+
+        <Divider />
+
+        <SectionLabel>Componentes</SectionLabel>
+        <Surface style={styles.componentSurface}>
+          <Text variant="subtitle" style={styles.componentLabel}>
+            Botones
+          </Text>
+          <View style={styles.buttonRow}>
+            <Button label="Nueva creación" onPress={() => {}} />
+            <Button label="Ver detalle" variant="secondary" onPress={() => {}} />
+            <Button label="Cancelar" variant="ghost" onPress={() => {}} />
+          </View>
+
+          <Divider spacing={theme.spacing.xl} />
+
+          <Text variant="subtitle" style={styles.componentLabel}>
+            Logo — variante marca
+          </Text>
+          <View style={styles.logoRow}>
+            <Logo variant="mark" height={22} />
+            <Logo variant="full" height={22} />
+          </View>
+        </Surface>
+
+        <View style={{ height: theme.spacing.huge }} />
+      </ScrollView>
+      <StatusBar style="light" />
+    </Screen>
+  );
+}
+
+export default function App() {
+  const [fontsLoaded] = useFonts({
+    PlusJakartaSans_400Regular,
+    PlusJakartaSans_500Medium,
+    PlusJakartaSans_600SemiBold,
+    PlusJakartaSans_700Bold,
+    PlusJakartaSans_800ExtraBold,
+  });
+
+  if (!fontsLoaded) {
+    return <View style={styles.loading} />;
+  }
+
+  return (
+    <ThemeProvider mode="dark">
+      <DesignSystemPreview />
+    </ThemeProvider>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
+  loading: {
     flex: 1,
-    backgroundColor: '#fff',
-    alignItems: 'center',
-    justifyContent: 'center',
+    backgroundColor: '#0A0A0A',
+  },
+  scrollContent: {
+    paddingTop: 24,
+    paddingBottom: 24,
+  },
+  hero: {
+    paddingVertical: 32,
+  },
+  heroCaption: {
+    marginTop: 20,
+  },
+  heroTitle: {
+    marginTop: 8,
+  },
+  swatchGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 16,
+    marginTop: 16,
+  },
+  swatchItem: {
+    width: 84,
+    gap: 4,
+  },
+  swatch: {
+    width: 56,
+    height: 56,
+    borderRadius: 12,
+    borderWidth: StyleSheet.hairlineWidth,
+    marginBottom: 4,
+  },
+  typeSurface: {
+    marginTop: 16,
+    gap: 10,
+  },
+  typeSample: {
+    marginBottom: 2,
+  },
+  componentSurface: {
+    marginTop: 16,
+  },
+  componentLabel: {
+    marginBottom: 12,
+  },
+  buttonRow: {
     gap: 12,
-    paddingHorizontal: 24,
-  },
-  title: {
-    fontSize: 18,
-    fontWeight: '700',
-    letterSpacing: 2,
-  },
-  subtitle: {
-    fontSize: 13,
-    color: '#666',
-  },
-  statusBlock: {
-    marginTop: 24,
-    gap: 6,
     alignItems: 'flex-start',
   },
-  statusLine: {
-    fontSize: 13,
-    color: '#333',
+  logoRow: {
+    flexDirection: 'row',
+    gap: 24,
+    alignItems: 'center',
   },
 });
