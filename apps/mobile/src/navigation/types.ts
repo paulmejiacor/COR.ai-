@@ -1,4 +1,5 @@
 import type { ImageSourcePropType } from 'react-native';
+import type { CompositionSettings } from '@cor/shared-types';
 
 /**
  * Rutas "próximamente": pantallas que ya se pueden abrir pero cuyo
@@ -25,6 +26,11 @@ export type CompositionEditorParams = CapturedPhotoParams & {
   sceneThumbnail?: ImageSourcePropType;
 };
 
+export type ProcessingParams = CapturedPhotoParams & {
+  sceneDescription?: string;
+  composition: CompositionSettings;
+};
+
 export type RootStackParamList = {
   Home: undefined;
   NewCreation: undefined;
@@ -33,5 +39,6 @@ export type RootStackParamList = {
   MaskReview: CapturedPhotoParams;
   SceneSelection: CapturedPhotoParams;
   CompositionEditor: CompositionEditorParams;
+  Processing: ProcessingParams;
   Placeholder: PlaceholderRoute;
 };

@@ -23,11 +23,11 @@ export function PlaceholderScreen({ route, navigation }: Props) {
           <>
             <Image source={{ uri: photoUri }} style={[styles.preview, { borderRadius: theme.radii.lg, marginTop: theme.spacing.lg }]} />
             <Text variant="body" color="secondary" style={{ marginTop: theme.spacing.md }}>
-              Fotografía lista. La detección automática del vehículo se construye en una fase posterior del plan acordado.
+              El contenido completo de esta pantalla se construye en una fase posterior del plan acordado.
             </Text>
             {note ? (
               <Text variant="bodySmall" color="secondary" style={{ marginTop: theme.spacing.sm, fontStyle: 'italic' }}>
-                Escenario elegido: "{note}"
+                "{note}"
               </Text>
             ) : null}
           </>

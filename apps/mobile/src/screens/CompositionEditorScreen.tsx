@@ -138,13 +138,13 @@ export function CompositionEditorScreen({ route, navigation }: Props) {
   };
 
   const handleContinue = () => {
-    const summary = `Posición ${settings.position}, escala ${settings.scale.toFixed(2)}x, rotación ${settings.rotation.toFixed(0)}°, distancia ${Math.round(settings.distance * 100)}%.`;
-    const note = sceneDescription ? `${sceneDescription} — ${summary}` : summary;
-    navigation.navigate('Placeholder', {
-      title: 'Procesando',
-      phase: 'Fase 9 — Pantalla de procesamiento',
+    navigation.navigate('Processing', {
       photoUri,
-      note,
+      photoWidth,
+      photoHeight,
+      source,
+      sceneDescription,
+      composition: settings,
     });
   };
 

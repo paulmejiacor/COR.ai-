@@ -148,7 +148,20 @@ Nuevo paquete `packages/design-system` (`@cor/design-system`), consumido por `ap
 - Verificación real en Chromium: arrastrar el slider de Escala cambia el tamaño del vehículo en vivo (probado hasta 1.35x); tocar "Izquierda" lo reposiciona sin deformarlo; arrastrar Rotación lo gira visiblemente (probado a 6°); "CONTINUAR" navega a la Fase 9 con el resumen completo de la composición. Sin errores de consola.
 - Verificación del arrastre directo: simular un drag de mouse sobre el vehículo lo mueve en tiempo real siguiendo el cursor, y tocar un preset de posición después reinicia limpiamente el offset manual. El pellizco de dos dedos no se pudo simular en este entorno headless (no hay multi-touch real), así que su confirmación final queda pendiente de prueba en el teléfono del usuario — la lógica es simétrica a la del arrastre, ya verificada.
 
-## 18. Próximas fases (según el plan acordado)
+## 18. Pantalla de procesamiento (Fase 9)
+
+- `ProcessingScreen` (ruta `Processing`): arma un `GenerationRequest` real (vehículo + máscara + escena + composición de la Fase 8 + watermark por defecto) y llama a `getAIImageService().generate(request, onProgress)` — el mismo mock definido desde la Fase 1, sin cambios. Cuando se conecte un proveedor real (Fase 14), esta pantalla no cambia: solo cambia qué clase devuelve `getAIImageService()`.
+- Muestra los 6 mensajes exactos del brief ("Analizando vehículo...", "Protegiendo características originales...", "Construyendo escenario...", "Adaptando iluminación...", "Aplicando acabado COR...", "Preparando imagen final...") como un checklist en vivo — paso activo con anillo pulsante, pasos completados con check, barra de progreso superior sincronizada con el `progress` real que emite el servicio.
+- Sin botón de regreso (no se puede interrumpir la generación) y usa `navigation.replace` al terminar, para que el usuario no pueda volver a la pantalla de procesamiento con el botón atrás.
+- Al completar, navega al placeholder de la Fase 10 con la imagen resultante (`resultImageUri`, hoy un passthrough del mock). Se ajustó el texto genérico de `PlaceholderScreen` para que tenga sentido tanto después de la detección como después de la generación.
+
+## 19. Estado verificado (Fase 9)
+
+- `npm run typecheck` — limpio en los 7 workspaces.
+- `expo export --platform web` — bundlea sin errores.
+- Verificación real en Chromium: el flujo completo (foto → escenario → composición → "CONTINUAR") dispara la generación, se ven los 6 pasos avanzar en orden con sus checks y la barra de progreso, y al terminar navega solo a "Fase 10 — Resultado" mostrando la imagen. Sin errores de consola.
+
+## 20. Próximas fases (según el plan acordado)
 
 1. ~~Arquitectura~~ ✅
 2. ~~Sistema visual COR~~ ✅
@@ -158,11 +171,11 @@ Nuevo paquete `packages/design-system` (`@cor/design-system`), consumido por `ap
 6. ~~Detección del vehículo~~ ✅
 7. ~~Selección de escenario~~ ✅
 8. ~~Editor de composición~~ ✅
-9. Pantalla de procesamiento
+9. ~~Pantalla de procesamiento~~ ✅
 10. Resultado
 11. Comparador antes/después
 12. Exportación
 13. Historial ("Mis proyectos")
 14. Preparación de integración real de IA
 
-No se avanza a la Fase 9 hasta confirmación.
+No se avanza a la Fase 10 hasta confirmación.
