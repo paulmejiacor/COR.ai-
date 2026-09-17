@@ -44,3 +44,11 @@ No se inventan colores adicionales como principales (instrucción explícita del
 - Wordmark COR en negro/blanco sólido en UI; reservar el chrome para el splash/onboarding.
 - Proxima Nova Alt como fuente del sistema (con fallback a una geométrica del sistema si la licencia no está disponible en el MVP).
 - Motivo de corner brackets como accesorio visual opcional en pantallas hero (Home, Splash, Resultado).
+
+## Isologo real (actualizado durante la Fase 6)
+
+El componente `Logo` (`packages/design-system/src/components/Logo.tsx`) ya **no** es una reconstrucción dibujada a mano — se reemplazó por las versiones sólidas oficiales, recortadas y recolorizadas por umbral directamente de la página "Colorimetría, versiones de color" del manual (400 DPI, transparencia real):
+- `packages/design-system/assets/brand/cor-logo-white.png` — tinta blanca, para fondos oscuros.
+- `packages/design-system/assets/brand/cor-logo-black.png` — tinta negra, para fondos claros.
+
+Sigue pendiente que el equipo de marca entregue el archivo vectorial (.ai/.svg) original; cuando esté disponible, solo hay que sustituir estos dos PNG por exports del vector real, sin tocar el resto del código (`Logo` ya centraliza el asset en un solo lugar).
