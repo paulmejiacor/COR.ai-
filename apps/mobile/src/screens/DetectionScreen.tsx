@@ -73,12 +73,7 @@ export function DetectionScreen({ route, navigation }: Props) {
         }
       : null;
 
-  const goToSceneSelection = () =>
-    navigation.navigate('Placeholder', {
-      title: 'Escenario',
-      phase: 'Fase 7 — Selección de escenario',
-      photoUri,
-    });
+  const goToSceneSelection = () => navigation.navigate('SceneSelection', { photoUri, photoWidth, photoHeight, source });
 
   return (
     <Screen>

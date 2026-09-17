@@ -6,6 +6,7 @@ import { NewCreationScreen } from '../screens/NewCreationScreen';
 import { CameraCaptureScreen } from '../screens/CameraCaptureScreen';
 import { DetectionScreen } from '../screens/DetectionScreen';
 import { MaskReviewScreen } from '../screens/MaskReviewScreen';
+import { SceneSelectionScreen } from '../screens/SceneSelectionScreen';
 import { PlaceholderScreen } from '../screens/PlaceholderScreen';
 import type { RootStackParamList } from './types';
 
@@ -35,6 +36,7 @@ export function RootNavigator() {
         <Stack.Screen name="Camera" component={CameraCaptureScreen} />
         <Stack.Screen name="Detection" component={DetectionScreen} />
         <Stack.Screen name="MaskReview" component={MaskReviewScreen} />
+        <Stack.Screen name="SceneSelection" component={SceneSelectionScreen} />
         <Stack.Screen name="Placeholder" component={PlaceholderScreen} />
       </Stack.Navigator>
     </NavigationContainer>

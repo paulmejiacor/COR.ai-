@@ -8,6 +8,7 @@ export type PlaceholderRoute = {
   title: string;
   phase: string;
   photoUri?: string;
+  note?: string;
 };
 
 export type CapturedPhotoParams = {
@@ -23,5 +24,6 @@ export type RootStackParamList = {
   Camera: undefined;
   Detection: CapturedPhotoParams;
   MaskReview: CapturedPhotoParams;
+  SceneSelection: CapturedPhotoParams;
   Placeholder: PlaceholderRoute;
 };

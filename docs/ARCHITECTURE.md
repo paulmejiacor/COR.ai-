@@ -120,7 +120,20 @@ Nuevo paquete `packages/design-system` (`@cor/design-system`), consumido por `ap
 - `expo export --platform web` — bundlea sin errores.
 - Verificación real en Chromium: foto real (galería) → "Analizando vehículo..." → "Vehículo detectado" con el spotlight y confianza (97%) → "Revisar selección" → se dibujaron trazos reales de agregar (verde) y quitar (rojo), el contador de correcciones se actualizó, y "Deshacer" quitó el último trazo correctamente. Sin errores de consola.
 
-## 14. Próximas fases (según el plan acordado)
+## 14. Selección de escenario (Fase 7)
+
+- `SceneSelectionScreen` (ruta `SceneSelection`): campo de texto libre "Describe el escenario..." + plantillas agrupadas por categoría (`Showroom COR`, `Automotriz`, `Urbano`, `Naturaleza`, `Noche`) en filas horizontales con scroll, tal como pide el brief. Tocar una plantilla llena el texto con su `basePrompt` y la resalta; editar el texto a mano la deselecciona.
+- **Plantillas reales, sin stock genérico inventado**: dos de las plantillas de "Showroom COR" son los propios renders del manual de marca (la fachada al atardecer y el interior con el isologo en la pared) — recortados de las páginas de "Aplicaciones gráficas" del PDF, redimensionados y empacados como `apps/mobile/assets/scenes/*.jpg`. El resto (Dark Studio, Marble Showroom, Ciudad Moderna, Montaña, Desierto, Playa, Pista de Carreras, Garage, Ciudad de Noche) son fotos de Unsplash — licencia gratuita, uso comercial permitido, sin atribución obligatoria — buscadas vía el conector de Unsplash y referenciadas por URL en `apps/mobile/src/data/scenePresets.ts`.
+- Ese archivo define `UIScenePreset` (con `thumbnail: ImageSourcePropType`) deliberadamente **fuera** de `@cor/shared-types`, para no acoplar el paquete de dominio (pensado para reutilizarse en un futuro backend) a tipos de React Native.
+- Al continuar, la descripción final (manual o de plantilla) viaja como `note` en `PlaceholderRoute` hacia el placeholder de la Fase 8, que ya sabe mostrarla junto a la foto — el mismo patrón usado en fases anteriores.
+
+## 15. Estado verificado (Fase 7)
+
+- `npm run typecheck` — limpio en los 7 workspaces.
+- `expo export --platform web` — bundlea sin errores, assets locales (`cor-showroom-*.jpg`) incluidos en el bundle.
+- Verificación real en Chromium: las dos plantillas propias de COR (imágenes locales) cargan correctamente; las plantillas de Unsplash no cargaron en esta verificación porque el proxy de red de este entorno de pruebas bloquea `images.unsplash.com` — confirmado con una prueba de conexión directa (403 del proxy) — pero es una CDN pública sin restricciones, así que cargarán con normalidad en el teléfono del usuario. Seleccionar una plantilla rellena el texto correctamente, y "CONTINUAR" navega a la Fase 8 con el escenario elegido visible. Sin errores de consola relacionados con el código de la app.
+
+## 16. Próximas fases (según el plan acordado)
 
 1. ~~Arquitectura~~ ✅
 2. ~~Sistema visual COR~~ ✅
@@ -128,7 +141,7 @@ Nuevo paquete `packages/design-system` (`@cor/design-system`), consumido por `ap
 4. ~~Flujo "Nueva Creación"~~ ✅
 5. ~~Carga de fotografía (cámara/galería)~~ ✅
 6. ~~Detección del vehículo~~ ✅
-7. Selección de escenario
+7. ~~Selección de escenario~~ ✅
 8. Editor de composición
 9. Pantalla de procesamiento
 10. Resultado
@@ -137,4 +150,4 @@ Nuevo paquete `packages/design-system` (`@cor/design-system`), consumido por `ap
 13. Historial ("Mis proyectos")
 14. Preparación de integración real de IA
 
-No se avanza a la Fase 7 hasta confirmación.
+No se avanza a la Fase 8 hasta confirmación.

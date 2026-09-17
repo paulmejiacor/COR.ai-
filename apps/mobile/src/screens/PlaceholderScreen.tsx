@@ -7,7 +7,7 @@ type Props = NativeStackScreenProps<RootStackParamList, 'Placeholder'>;
 
 /** Destino temporal de los botones cuyo flujo real todavía no se construye en esta fase. */
 export function PlaceholderScreen({ route, navigation }: Props) {
-  const { title, phase, photoUri } = route.params;
+  const { title, phase, photoUri, note } = route.params;
   const theme = useTheme();
 
   return (
@@ -25,6 +25,11 @@ export function PlaceholderScreen({ route, navigation }: Props) {
             <Text variant="body" color="secondary" style={{ marginTop: theme.spacing.md }}>
               Fotografía lista. La detección automática del vehículo se construye en una fase posterior del plan acordado.
             </Text>
+            {note ? (
+              <Text variant="bodySmall" color="secondary" style={{ marginTop: theme.spacing.sm, fontStyle: 'italic' }}>
+                Escenario elegido: "{note}"
+              </Text>
+            ) : null}
           </>
         ) : (
           <Text variant="body" color="secondary" style={{ marginTop: theme.spacing.sm }}>
