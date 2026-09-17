@@ -1,0 +1,17 @@
+{
+  "name": "cor-ai-automotive-studio",
+  "private": true,
+  "version": "0.1.0",
+  "description": "COR AI Automotive Studio — herramienta de creación y edición fotográfica automotriz asistida por IA.",
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "mobile": "npm run start --workspace apps/mobile",
+    "typecheck": "npm run typecheck --workspaces --if-present"
+  },
+  "devDependencies": {
+    "typescript": "~5.9.3"
+  }
+}
