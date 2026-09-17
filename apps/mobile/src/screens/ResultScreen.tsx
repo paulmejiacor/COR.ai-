@@ -70,9 +70,6 @@ export function ResultScreen({ route, navigation }: Props) {
   const { photoUri, photoWidth, photoHeight, source, sceneDescription, composition, resultImageUri } = route.params;
   const theme = useTheme();
 
-  const goToPlaceholder = (title: string, phase: string) =>
-    navigation.navigate('Placeholder', { title, phase, photoUri: resultImageUri, note: sceneDescription });
-
   const handleRegenerate = () =>
     navigation.replace('Processing', { photoUri, photoWidth, photoHeight, source, sceneDescription, composition });
 
@@ -129,7 +126,11 @@ export function ResultScreen({ route, navigation }: Props) {
             label="Comparar"
             onPress={() => navigation.navigate('Compare', { beforeUri: photoUri, afterUri: resultImageUri, photoWidth, photoHeight })}
           />
-          <NavCard icon="download" label="Exportar" onPress={() => goToPlaceholder('Exportar', 'Fase 12 — Exportación')} />
+          <NavCard
+            icon="download"
+            label="Exportar"
+            onPress={() => navigation.navigate('Export', { resultImageUri, photoWidth, photoHeight })}
+          />
           <NavCard icon="share" label="Compartir" onPress={handleShare} />
           <NavCard icon="save" label="Guardar" onPress={handleSave} />
         </View>

@@ -187,7 +187,21 @@ Metadatos mostrados: Vehículo (origen cámara/galería), Escenario (la descripc
 - `expo export --platform web` — bundlea sin errores.
 - Verificación real en Chromium: arrastrar desde el centro hasta ~20% del ancho mueve el grip y la línea divisoria exactamente hasta ese punto, revelando más o menos de la imagen "antes" en tiempo real. Sin errores de consola.
 
-## 24. Próximas fases (según el plan acordado)
+## 24. Exportación (Fase 12)
+
+`ExportScreen` (ruta `Export`) implementa las secciones 14 y 15 del brief juntas, porque el watermark solo tiene sentido en el contexto de exportar:
+
+- **Formatos**: los 6 presets exactos del brief (Instagram Post, Instagram Story, Web, WhatsApp, Facebook, Original) más "Personalizado" (ancho/alto/formato JPG·PNG·WebP), usando `EXPORT_PRESETS` y `resolveExportSpec` de `@cor/shared-types`/`@cor/image-processing` — ya definidos desde la Fase 1, sin cambios.
+- **Exportación real, no simulada**: `computeCoverCropRect` (nuevo, en `@cor/image-processing`) calcula un recorte centrado que conserva la relación de aspecto del formato elegido sin deformar la imagen; `apps/mobile/src/lib/exportImage.ts` aplica ese recorte y el resize final con `expo-image-manipulator`. El botón "Exportar" de la Fase 10 ya no es un placeholder: produce un archivo nuevo, del tamaño y formato correctos, que se puede compartir con `expo-sharing`.
+- **Marca COR (watermark)**: Logo / Logo + nombre / Sin marca, las 4 esquinas, y sliders de Tamaño y Opacidad — usando `computeWatermarkLayout` de `@cor/image-processing` (Fase 1) para posicionar el isologo real (Fase 6) sobre la vista previa en vivo. Importante: el watermark se **previsualiza** de forma real sobre la imagen en pantalla, pero todavía no se "hornea" en los píxeles del archivo exportado — eso requiere composición de imágenes (Skia o canvas), fuera del alcance de `expo-image-manipulator`. Queda anotado como trabajo pendiente, no oculto.
+
+## 25. Estado verificado (Fase 12)
+
+- `npm run typecheck` — limpio en los 7 workspaces.
+- `expo export --platform web` — bundlea sin errores (incluye `expo-image-manipulator`).
+- Verificación real en Chromium: la vista previa muestra el watermark COR real compuesto en la esquina inferior derecha; los 7 formatos y los controles de marca (esquina, tamaño, opacidad) responden correctamente; al tocar "EXPORTAR" se genera un archivo real recortado y redimensionado a 1080×1080 (verificado con las dimensiones exactas devueltas por `expo-image-manipulator`), mostrado en una tarjeta de confirmación con opción de compartir. Sin errores de consola.
+
+## 26. Próximas fases (según el plan acordado)
 
 1. ~~Arquitectura~~ ✅
 2. ~~Sistema visual COR~~ ✅
@@ -200,8 +214,8 @@ Metadatos mostrados: Vehículo (origen cámara/galería), Escenario (la descripc
 9. ~~Pantalla de procesamiento~~ ✅
 10. ~~Resultado~~ ✅
 11. ~~Comparador antes/después~~ ✅
-12. Exportación
+12. ~~Exportación~~ ✅
 13. Historial ("Mis proyectos")
 14. Preparación de integración real de IA
 
-No se avanza a la Fase 12 hasta confirmación.
+No se avanza a la Fase 13 hasta confirmación.

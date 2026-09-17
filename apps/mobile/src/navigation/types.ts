@@ -42,6 +42,12 @@ export type CompareParams = {
   photoHeight: number;
 };
 
+export type ExportParams = {
+  resultImageUri: string;
+  photoWidth: number;
+  photoHeight: number;
+};
+
 export type RootStackParamList = {
   Home: undefined;
   NewCreation: undefined;
@@ -53,5 +59,6 @@ export type RootStackParamList = {
   Processing: ProcessingParams;
   Result: ResultParams;
   Compare: CompareParams;
+  Export: ExportParams;
   Placeholder: PlaceholderRoute;
 };

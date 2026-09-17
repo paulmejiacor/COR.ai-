@@ -14,7 +14,8 @@ const SOURCE_WHITE_INK = require('../../assets/brand/cor-logo-white.png');
 const SOURCE_BLACK_INK = require('../../assets/brand/cor-logo-black.png');
 
 /** Proporción real del recorte (759×264, extraído del manual de marca oficial). */
-const ASPECT_RATIO = 759 / 264;
+export const LOGO_ASPECT_RATIO = 759 / 264;
+const ASPECT_RATIO = LOGO_ASPECT_RATIO;
 
 /**
  * Isologo COR — recortado y recolorizado directamente del manual de marca
