@@ -201,7 +201,24 @@ Metadatos mostrados: Vehículo (origen cámara/galería), Escenario (la descripc
 - `expo export --platform web` — bundlea sin errores (incluye `expo-image-manipulator`).
 - Verificación real en Chromium: la vista previa muestra el watermark COR real compuesto en la esquina inferior derecha; los 7 formatos y los controles de marca (esquina, tamaño, opacidad) responden correctamente; al tocar "EXPORTAR" se genera un archivo real recortado y redimensionado a 1080×1080 (verificado con las dimensiones exactas devueltas por `expo-image-manipulator`), mostrado en una tarjeta de confirmación con opción de compartir. Sin errores de consola.
 
-## 26. Próximas fases (según el plan acordado)
+## 26. Historial — "Mis proyectos" (Fase 13)
+
+`HistoryScreen` (ruta `History`, abierta desde el NavCard "Mis proyectos" en Home) implementa la sección 16 del brief:
+
+- **Persistencia real en el dispositivo**: `@cor/storage` cambia su implementación por defecto de `MemoryStorageService` (se perdía todo al recargar) a `AsyncStorageService` (nueva, usa `@react-native-async-storage/async-storage`), que serializa `Project[]` en una sola clave de AsyncStorage. `getStorageService()` sigue siendo el único punto de acceso — ninguna pantalla cambió — así que el guardado que ya existía desde la Fase 10 ahora sobrevive a cerrar y reabrir la app. `MemoryStorageService` se conserva exportado para pruebas.
+- **Lista real**: `FlatList` de proyectos ordenados por `updatedAt` (más reciente primero), con miniatura real (`latestResult.resultImageUri`), nombre, prompt del escenario, punto de estado (`draft/processing/completed/failed`) y fecha formateada. Estado vacío con CTA a "Nueva creación" cuando no hay proyectos.
+- **Abrir**: reconstruye los parámetros completos de `Result` a partir del `Project` guardado (foto origen, escenario, composición, imagen resultado) y navega a la pantalla real de Resultado — no es una vista de solo lectura aparte, es la misma pantalla de la Fase 10 con los datos reales del proyecto.
+- **Duplicar**: `duplicateProject` (ya existía en la interfaz desde la Fase 1) crea una copia independiente persistida.
+- **Eliminar**: confirmación vía `Alert.alert` (destructivo) antes de `deleteProject`. Nota de entorno: `Alert.alert` no tiene equivalente visual en este sandbox web, así que el flujo de confirmación de borrado no se pudo grabar en captura aquí — el código y el resto de las acciones (crear, listar, abrir, duplicar) sí están verificados en video/captura.
+- Dos íconos nuevos en el set propio de `@cor/design-system`: `copy` y `trash`.
+
+## 27. Estado verificado (Fase 13)
+
+- `npm run typecheck` — limpio en los 7 workspaces.
+- `expo export --platform web` — bundlea sin errores (incluye `@react-native-async-storage/async-storage`).
+- Verificación real en Chromium: estado vacío correcto → se crea y guarda un proyecto real → aparece en el historial con miniatura y metadatos correctos → "Duplicar" crea una segunda entrada independiente → tocar una tarjeta navega a la pantalla real de Resultado con los datos exactos del proyecto → **recarga completa de página (equivalente a relanzar la app) y los 2 proyectos siguen ahí**, confirmando que la persistencia es real en disco y no solo en memoria. Sin errores de consola.
+
+## 28. Próximas fases (según el plan acordado)
 
 1. ~~Arquitectura~~ ✅
 2. ~~Sistema visual COR~~ ✅
@@ -215,7 +232,7 @@ Metadatos mostrados: Vehículo (origen cámara/galería), Escenario (la descripc
 10. ~~Resultado~~ ✅
 11. ~~Comparador antes/después~~ ✅
 12. ~~Exportación~~ ✅
-13. Historial ("Mis proyectos")
+13. ~~Historial ("Mis proyectos")~~ ✅
 14. Preparación de integración real de IA
 
-No se avanza a la Fase 13 hasta confirmación.
+No se avanza a la Fase 14 hasta confirmación.

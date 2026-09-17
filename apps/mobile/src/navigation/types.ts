@@ -60,5 +60,6 @@ export type RootStackParamList = {
   Result: ResultParams;
   Compare: CompareParams;
   Export: ExportParams;
+  History: undefined;
   Placeholder: PlaceholderRoute;
 };

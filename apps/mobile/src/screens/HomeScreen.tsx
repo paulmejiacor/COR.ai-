@@ -28,11 +28,7 @@ export function HomeScreen({ navigation }: Props) {
           <Button label="NUEVA CREACIÓN" fullWidth onPress={() => navigation.navigate('NewCreation')} />
 
           <View style={[styles.grid, { marginTop: theme.spacing.lg }]}>
-            <NavCard
-              icon="folder"
-              label="Mis proyectos"
-              onPress={() => openPlaceholder('Mis proyectos', 'Fase 13 — Historial')}
-            />
+            <NavCard icon="folder" label="Mis proyectos" onPress={() => navigation.navigate('History')} />
             <NavCard
               icon="grid"
               label="Plantillas"
