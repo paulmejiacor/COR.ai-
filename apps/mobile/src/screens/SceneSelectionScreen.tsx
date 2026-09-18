@@ -1,7 +1,11 @@
-import { useState } from 'react';
-import { View, Image, ScrollView, TextInput, Pressable, StyleSheet } from 'react-native';
+import { useCallback, useState } from 'react';
+import { Alert, View, Image, ScrollView, TextInput, Pressable, StyleSheet } from 'react-native';
+import * as ImagePicker from 'expo-image-picker';
+import * as FileSystem from 'expo-file-system/legacy';
+import { useFocusEffect } from '@react-navigation/native';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { Screen, Header, Text, SectionLabel, Button, useTheme } from '@cor/design-system';
+import { Screen, Header, Text, SectionLabel, Button, Icon, useTheme } from '@cor/design-system';
+import { listCustomScenes, addCustomScene, type CustomScene } from '@cor/storage';
 import type { RootStackParamList } from '../navigation/types';
 import { SCENE_PRESETS, SCENE_CATEGORY_LABEL, SCENE_CATEGORY_ORDER, type UIScenePreset } from '../data/scenePresets';
 
@@ -13,11 +17,45 @@ const EXAMPLES = [
   'Hotel de lujo en Dubai durante la noche.',
 ];
 
+async function ensureCustomScenesDir(): Promise<string> {
+  const dir = `${FileSystem.documentDirectory}custom-scenes/`;
+  const info = await FileSystem.getInfoAsync(dir);
+  if (!info.exists) {
+    await FileSystem.makeDirectoryAsync(dir, { intermediates: true });
+  }
+  return dir;
+}
+
 export function SceneSelectionScreen({ route, navigation }: Props) {
   const { photoUri, photoWidth, photoHeight, source } = route.params;
   const theme = useTheme();
   const [description, setDescription] = useState('');
   const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [customScenes, setCustomScenes] = useState<CustomScene[]>([]);
+  const [addingScene, setAddingScene] = useState(false);
+
+  const reloadCustomScenes = useCallback(() => {
+    listCustomScenes()
+      .then(setCustomScenes)
+      .catch(() => setCustomScenes([]));
+  }, []);
+
+  useFocusEffect(
+    useCallback(() => {
+      reloadCustomScenes();
+    }, [reloadCustomScenes])
+  );
+
+  const allPresets: UIScenePreset[] = [
+    ...SCENE_PRESETS,
+    ...customScenes.map((s) => ({
+      id: s.id,
+      category: 'custom' as const,
+      name: s.name,
+      basePrompt: `Escenario personalizado: ${s.name}.`,
+      thumbnail: { uri: s.uri },
+    })),
+  ];
 
   const selectPreset = (preset: UIScenePreset) => {
     setSelectedId(preset.id);
@@ -29,8 +67,43 @@ export function SceneSelectionScreen({ route, navigation }: Props) {
     setSelectedId(null);
   };
 
+  const handleAddScene = async () => {
+    const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    if (!permission.granted) {
+      Alert.alert('Permiso necesario', 'Necesitamos acceso a tus fotos para agregar un escenario.');
+      return;
+    }
+
+    setAddingScene(true);
+    try {
+      const result = await ImagePicker.launchImageLibraryAsync({ mediaTypes: ['images'], quality: 0.9 });
+      if (result.canceled || result.assets.length === 0) return;
+
+      const asset = result.assets[0];
+      const dir = await ensureCustomScenesDir();
+      const id = `custom_${Date.now()}`;
+      const dest = `${dir}${id}.jpg`;
+      // Copiamos a un directorio propio de la app: la URI que entrega el
+      // selector de galería puede ser temporal y no sobrevivir a un reinicio.
+      await FileSystem.copyAsync({ from: asset.uri, to: dest });
+
+      const scene: CustomScene = {
+        id,
+        name: `Escenario ${customScenes.length + 1}`,
+        uri: dest,
+        createdAt: new Date().toISOString(),
+      };
+      await addCustomScene(scene);
+      reloadCustomScenes();
+    } catch (error) {
+      Alert.alert('No se pudo agregar', String(error));
+    } finally {
+      setAddingScene(false);
+    }
+  };
+
   const handleContinue = () => {
-    const selectedPreset = SCENE_PRESETS.find((p) => p.id === selectedId);
+    const selectedPreset = allPresets.find((p) => p.id === selectedId);
     navigation.navigate('CompositionEditor', {
       photoUri,
       photoWidth,
@@ -78,8 +151,8 @@ export function SceneSelectionScreen({ route, navigation }: Props) {
         </Text>
 
         {SCENE_CATEGORY_ORDER.map((category) => {
-          const presets = SCENE_PRESETS.filter((p) => p.category === category);
-          if (presets.length === 0) return null;
+          const presets = allPresets.filter((p) => p.category === category);
+          if (category !== 'custom' && presets.length === 0) return null;
           return (
             <View key={category} style={{ marginTop: theme.spacing.xxl }}>
               <SectionLabel>{SCENE_CATEGORY_LABEL[category]}</SectionLabel>
@@ -88,6 +161,23 @@ export function SceneSelectionScreen({ route, navigation }: Props) {
                 showsHorizontalScrollIndicator={false}
                 contentContainerStyle={{ gap: theme.spacing.sm, marginTop: theme.spacing.md }}
               >
+                {category === 'custom' ? (
+                  <Pressable onPress={handleAddScene} disabled={addingScene} style={styles.card}>
+                    <View
+                      style={[
+                        styles.cardImage,
+                        styles.addCard,
+                        { borderRadius: theme.radii.md, borderColor: theme.colors.border },
+                      ]}
+                    >
+                      <Icon name="plusCircle" size={22} color={theme.colors.textSecondary} />
+                    </View>
+                    <Text variant="bodySmall" color="secondary" numberOfLines={1} style={{ marginTop: 6, width: 108 }}>
+                      {addingScene ? 'Agregando…' : 'Agregar escenario'}
+                    </Text>
+                  </Pressable>
+                ) : null}
+
                 {presets.map((preset) => {
                   const selected = preset.id === selectedId;
                   return (
@@ -145,5 +235,11 @@ const styles = StyleSheet.create({
     width: 108,
     height: 80,
     borderWidth: 2,
+  },
+  addCard: {
+    borderWidth: 1,
+    borderStyle: 'dashed',
+    alignItems: 'center',
+    justifyContent: 'center',
   },
 });

@@ -5,6 +5,7 @@ import { AsyncStorageService } from './AsyncStorageService';
 export * from './StorageService';
 export { MemoryStorageService } from './MemoryStorageService';
 export { AsyncStorageService } from './AsyncStorageService';
+export * from './CustomSceneStorage';
 
 let instance: StorageService | null = null;
 

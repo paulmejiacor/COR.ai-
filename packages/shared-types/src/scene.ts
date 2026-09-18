@@ -1,4 +1,5 @@
 export type ScenePresetCategory =
+  | 'custom'
   | 'showroom'
   | 'urban'
   | 'nature'
