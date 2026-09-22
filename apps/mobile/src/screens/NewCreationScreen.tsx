@@ -3,6 +3,7 @@ import { View, StyleSheet } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { Screen, Header, Text, SectionLabel, OptionTile, useTheme } from '@cor/design-system';
+import { normalizeCapturedPhoto } from '../lib/normalizePhoto';
 import type { RootStackParamList } from '../navigation/types';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'NewCreation'>;
@@ -34,10 +35,11 @@ export function NewCreationScreen({ navigation }: Props) {
       if (result.canceled || result.assets.length === 0) return;
 
       const asset = result.assets[0];
+      const normalized = await normalizeCapturedPhoto(asset.uri);
       navigation.navigate('Detection', {
-        photoUri: asset.uri,
-        photoWidth: asset.width,
-        photoHeight: asset.height,
+        photoUri: normalized.uri,
+        photoWidth: normalized.width,
+        photoHeight: normalized.height,
         source: 'gallery',
       });
     } finally {

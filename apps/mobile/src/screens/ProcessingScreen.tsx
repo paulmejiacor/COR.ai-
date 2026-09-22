@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { Alert, View, Animated, Easing, StyleSheet } from 'react-native';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { Screen, Text, Icon, useTheme } from '@cor/design-system';
-import { resolveAIImageService } from '../lib/aiService';
+import { resolveAIImageService, hasRealAIProvider } from '../lib/aiService';
 import {
   GENERATION_STAGE_LABEL_ES,
   DEFAULT_WATERMARK_SETTINGS,
@@ -116,6 +116,14 @@ export function ProcessingScreen({ route, navigation }: Props) {
   return (
     <Screen>
       <View style={styles.container}>
+        {!hasRealAIProvider ? (
+          <View style={[styles.demoBadge, { borderColor: theme.semantic.danger }]}>
+            <Text variant="caption" uppercase style={{ color: theme.semantic.danger }}>
+              Vista previa demo · sin IA real
+            </Text>
+          </View>
+        ) : null}
+
         <Animated.View style={[styles.ring, { borderColor: theme.colors.accent, opacity: pulse }]} />
 
         <Text variant="title" align="center" style={{ marginTop: theme.spacing.xxl }}>
@@ -169,6 +177,14 @@ const styles = StyleSheet.create({
     height: 64,
     borderRadius: 32,
     borderWidth: 3,
+  },
+  demoBadge: {
+    position: 'absolute',
+    top: 0,
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderWidth: 1,
+    borderRadius: 999,
   },
   progressTrack: {
     width: '100%',

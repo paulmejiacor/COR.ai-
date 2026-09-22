@@ -4,6 +4,7 @@ import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { Screen, Header, Text, SectionLabel, Surface, NavCard, Button, useTheme } from '@cor/design-system';
 import { getStorageService } from '@cor/storage';
 import type { Project } from '@cor/shared-types';
+import { hasRealAIProvider } from '../lib/aiService';
 import type { RootStackParamList } from '../navigation/types';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Result'>;
@@ -114,7 +115,10 @@ export function ResultScreen({ route, navigation }: Props) {
           <MetaRow label="Vehículo" value={source === 'camera' ? 'Fotografiado con cámara' : 'Seleccionado de galería'} />
           <MetaRow label="Escenario" value={sceneDescription || 'Descripción personalizada'} last />
           <MetaRow label="Resolución" value={`${photoWidth} × ${photoHeight}`} />
-          <MetaRow label="Formato" value={guessFormat(resultImageUri)} last />
+          <MetaRow label="Formato" value={guessFormat(resultImageUri)} last={hasRealAIProvider} />
+          {!hasRealAIProvider ? (
+            <MetaRow label="Proveedor de IA" value="Demo (sin conexión real)" last />
+          ) : null}
         </Surface>
 
         <SectionLabel>Acciones</SectionLabel>

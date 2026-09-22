@@ -5,6 +5,7 @@ import { CameraView, useCameraPermissions } from 'expo-camera';
 import * as ImagePicker from 'expo-image-picker';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { Screen, Text, Button, Icon, Chip, CornerBrackets, useTheme } from '@cor/design-system';
+import { normalizeCapturedPhoto } from '../lib/normalizePhoto';
 import type { RootStackParamList } from '../navigation/types';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Camera'>;
@@ -26,10 +27,12 @@ export function CameraCaptureScreen({ navigation }: Props) {
       const photo = await cameraRef.current.takePictureAsync({ quality: 0.9 });
       if (!photo) return;
 
+      const normalized = await normalizeCapturedPhoto(photo.uri);
+
       navigation.replace('Detection', {
-        photoUri: photo.uri,
-        photoWidth: photo.width,
-        photoHeight: photo.height,
+        photoUri: normalized.uri,
+        photoWidth: normalized.width,
+        photoHeight: normalized.height,
         source: 'camera',
         angle,
       });
@@ -48,10 +51,11 @@ export function CameraCaptureScreen({ navigation }: Props) {
       if (result.canceled || result.assets.length === 0) return;
 
       const asset = result.assets[0];
+      const normalized = await normalizeCapturedPhoto(asset.uri);
       navigation.replace('Detection', {
-        photoUri: asset.uri,
-        photoWidth: asset.width,
-        photoHeight: asset.height,
+        photoUri: normalized.uri,
+        photoWidth: normalized.width,
+        photoHeight: normalized.height,
         source: 'gallery',
       });
     } finally {

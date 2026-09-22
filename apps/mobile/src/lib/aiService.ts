@@ -7,6 +7,13 @@ import { getAIImageService, type AIImageService } from '@cor/ai-image-service';
  */
 const FAL_KEY = process.env.EXPO_PUBLIC_FAL_KEY;
 
+/**
+ * Si esto es `false`, `generate()` devuelve la misma foto de entrada sin
+ * ningún cambio (ver `MockAIImageService`) — la pantalla de Procesando usa
+ * esto para no dejar que un resultado "demo" pase por real sin avisar.
+ */
+export const hasRealAIProvider = Boolean(FAL_KEY);
+
 export function resolveAIImageService(): AIImageService {
   if (FAL_KEY) {
     return getAIImageService({ provider: 'remote', apiKey: FAL_KEY });
