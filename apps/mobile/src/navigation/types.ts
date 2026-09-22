@@ -19,6 +19,8 @@ export type CapturedPhotoParams = {
   photoWidth: number;
   photoHeight: number;
   source: 'camera' | 'gallery';
+  /** Ángulo elegido en el selector de Cámara (Frontal 3/4, Lateral, ...); ausente en fotos de galería. */
+  angle?: string;
 };
 
 export type CompositionEditorParams = CapturedPhotoParams & {

@@ -27,7 +27,7 @@ async function ensureCustomScenesDir(): Promise<string> {
 }
 
 export function SceneSelectionScreen({ route, navigation }: Props) {
-  const { photoUri, photoWidth, photoHeight, source } = route.params;
+  const { photoUri, photoWidth, photoHeight, source, angle } = route.params;
   const theme = useTheme();
   const [description, setDescription] = useState('');
   const [selectedId, setSelectedId] = useState<string | null>(null);
@@ -109,6 +109,7 @@ export function SceneSelectionScreen({ route, navigation }: Props) {
       photoWidth,
       photoHeight,
       source,
+      angle,
       sceneDescription: description.trim() || undefined,
       sceneThumbnail: selectedPreset?.thumbnail,
     });

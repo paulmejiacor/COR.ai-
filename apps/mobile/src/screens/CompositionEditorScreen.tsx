@@ -25,7 +25,7 @@ function distanceBetween(touches: Array<{ pageX: number; pageY: number }>) {
 }
 
 export function CompositionEditorScreen({ route, navigation }: Props) {
-  const { photoUri, photoWidth, photoHeight, source, sceneDescription, sceneThumbnail } = route.params;
+  const { photoUri, photoWidth, photoHeight, source, angle, sceneDescription, sceneThumbnail } = route.params;
   const theme = useTheme();
   const [settings, setSettings] = useState<CompositionSettings>(DEFAULT_COMPOSITION_SETTINGS);
   const [manualOffset, setManualOffset] = useState({ x: 0, y: 0 });
@@ -177,6 +177,7 @@ export function CompositionEditorScreen({ route, navigation }: Props) {
       photoWidth,
       photoHeight,
       source,
+      angle,
       sceneDescription,
       composition: settings,
     });

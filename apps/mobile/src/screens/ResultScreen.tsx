@@ -16,13 +16,13 @@ function guessFormat(uri: string) {
 }
 
 function buildProject(params: Props['route']['params']): Project {
-  const { photoUri, photoWidth, photoHeight, source, resultImageUri, sceneDescription, composition } = params;
+  const { photoUri, photoWidth, photoHeight, source, angle, resultImageUri, sceneDescription, composition } = params;
   const now = new Date().toISOString();
   const photoId = `photo_${Date.now()}_${counter++}`;
 
   const vehicle: Project['vehicle'] = {
     id: `vehicle_${photoId}`,
-    sourcePhoto: { id: photoId, uri: photoUri, width: photoWidth, height: photoHeight, capturedAt: now, source },
+    sourcePhoto: { id: photoId, uri: photoUri, width: photoWidth, height: photoHeight, capturedAt: now, source, angle },
     mask: {
       id: `mask_${photoId}`,
       sourcePhotoId: photoId,

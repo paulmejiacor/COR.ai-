@@ -16,7 +16,7 @@ type Status = 'analyzing' | 'detected';
  * del área protegida y ofrece "Revisar selección" para corregirla a mano.
  */
 export function DetectionScreen({ route, navigation }: Props) {
-  const { photoUri, photoWidth, photoHeight, source } = route.params;
+  const { photoUri, photoWidth, photoHeight, source, angle } = route.params;
   const theme = useTheme();
   const [status, setStatus] = useState<Status>('analyzing');
   const [mask, setMask] = useState<VehicleMask | null>(null);
@@ -32,6 +32,7 @@ export function DetectionScreen({ route, navigation }: Props) {
       height: photoHeight,
       capturedAt: new Date().toISOString(),
       source,
+      angle,
     };
     getAIImageService()
       .detectVehicle(photo)
@@ -73,7 +74,8 @@ export function DetectionScreen({ route, navigation }: Props) {
         }
       : null;
 
-  const goToSceneSelection = () => navigation.navigate('SceneSelection', { photoUri, photoWidth, photoHeight, source });
+  const goToSceneSelection = () =>
+    navigation.navigate('SceneSelection', { photoUri, photoWidth, photoHeight, source, angle });
 
   return (
     <Screen>
@@ -146,7 +148,7 @@ export function DetectionScreen({ route, navigation }: Props) {
               label="Revisar selección"
               variant="secondary"
               fullWidth
-              onPress={() => navigation.navigate('MaskReview', { photoUri, photoWidth, photoHeight, source })}
+              onPress={() => navigation.navigate('MaskReview', { photoUri, photoWidth, photoHeight, source, angle })}
             />
           </View>
         )}

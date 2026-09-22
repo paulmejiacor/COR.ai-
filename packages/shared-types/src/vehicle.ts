@@ -6,6 +6,8 @@ export interface SourcePhoto {
   height: number;
   capturedAt: string;
   source: 'camera' | 'gallery';
+  /** Selected in the camera's angle picker (Frontal 3/4, Lateral, ...); undefined for gallery photos. */
+  angle?: string;
 }
 
 /** Editable correction applied by the user on top of an automatic mask. */

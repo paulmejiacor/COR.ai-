@@ -21,7 +21,7 @@ const STAGE_ORDER = Object.keys(GENERATION_STAGE_LABEL_ES) as GenerationStage[];
 let counter = 0;
 
 export function ProcessingScreen({ route, navigation }: Props) {
-  const { photoUri, photoWidth, photoHeight, source, sceneDescription, composition } = route.params;
+  const { photoUri, photoWidth, photoHeight, source, angle, sceneDescription, composition } = route.params;
   const theme = useTheme();
   const [stageIndex, setStageIndex] = useState(0);
   const [progress, setProgress] = useState(0);
@@ -48,6 +48,7 @@ export function ProcessingScreen({ route, navigation }: Props) {
       height: photoHeight,
       capturedAt: new Date().toISOString(),
       source,
+      angle,
     };
 
     const vehicle: Vehicle = {
@@ -94,6 +95,7 @@ export function ProcessingScreen({ route, navigation }: Props) {
           photoWidth,
           photoHeight,
           source,
+          angle,
           sceneDescription,
           composition,
         });
