@@ -57,5 +57,6 @@ export interface AIImageServiceConfig {
   provider: 'mock' | 'remote';
   /** Base URL for a future remote provider; unused by the mock provider. */
   remoteBaseUrl?: string;
+  /** Requerido cuando provider es 'remote' — clave de fal.ai (FLUX.1 Kontext). */
   apiKey?: string;
 }

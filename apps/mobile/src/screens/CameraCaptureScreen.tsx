@@ -141,7 +141,12 @@ export function CameraCaptureScreen({ navigation }: Props) {
         </ScrollView>
 
         <View style={styles.captureRow}>
-          <Pressable onPress={handleGallery} disabled={pickingGallery} style={styles.galleryButton}>
+          <Pressable
+            onPress={handleGallery}
+            disabled={pickingGallery}
+            accessibilityLabel="Elegir de galería"
+            style={styles.galleryButton}
+          >
             <Icon name="image" size={20} color="#FFFFFF" />
           </Pressable>
 

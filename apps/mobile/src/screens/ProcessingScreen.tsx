@@ -1,8 +1,8 @@
 import { useEffect, useRef, useState } from 'react';
-import { View, Animated, Easing, StyleSheet } from 'react-native';
+import { Alert, View, Animated, Easing, StyleSheet } from 'react-native';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { Screen, Text, Icon, useTheme } from '@cor/design-system';
-import { getAIImageService } from '@cor/ai-image-service';
+import { resolveAIImageService } from '../lib/aiService';
 import {
   GENERATION_STAGE_LABEL_ES,
   DEFAULT_WATERMARK_SETTINGS,
@@ -81,7 +81,7 @@ export function ProcessingScreen({ route, navigation }: Props) {
       vehicleLockEnabled: true,
     };
 
-    getAIImageService()
+    resolveAIImageService()
       .generate(request, (event) => {
         if (cancelled) return;
         setStageIndex(STAGE_ORDER.indexOf(event.stage));
@@ -99,6 +99,12 @@ export function ProcessingScreen({ route, navigation }: Props) {
           sceneDescription,
           composition,
         });
+      })
+      .catch((error) => {
+        if (cancelled) return;
+        Alert.alert('No se pudo generar la imagen', String(error?.message ?? error), [
+          { text: 'Volver', onPress: () => navigation.goBack() },
+        ]);
       });
 
     return () => {

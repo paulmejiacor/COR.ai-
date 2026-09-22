@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { View, Image, Animated, Easing, StyleSheet, type LayoutChangeEvent } from 'react-native';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { Screen, Header, Text, Button, CornerBrackets, useTheme } from '@cor/design-system';
-import { getAIImageService } from '@cor/ai-image-service';
+import { resolveAIImageService } from '../lib/aiService';
 import type { SourcePhoto, VehicleMask } from '@cor/shared-types';
 import type { RootStackParamList } from '../navigation/types';
 
@@ -34,7 +34,7 @@ export function DetectionScreen({ route, navigation }: Props) {
       source,
       angle,
     };
-    getAIImageService()
+    resolveAIImageService()
       .detectVehicle(photo)
       .then(({ mask: detected }) => {
         if (cancelled) return;
