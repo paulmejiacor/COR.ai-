@@ -1,4 +1,5 @@
 import { Pressable, StyleSheet, View } from 'react-native';
+import { useTheme } from '../theme';
 import { Text } from './Text';
 import { Icon } from './Icon';
 
@@ -10,12 +11,17 @@ export interface HeaderProps {
 
 /** Header minimalista propio — reemplaza el header nativo en todas las pantallas para mantener el look COR. */
 export function Header({ title, onBack, right }: HeaderProps) {
+  const theme = useTheme();
   return (
     <View style={styles.row}>
       <View style={styles.side}>
         {onBack ? (
-          <Pressable hitSlop={12} onPress={onBack} style={styles.backButton}>
-            <Icon name="chevronLeft" size={20} />
+          <Pressable
+            hitSlop={12}
+            onPress={onBack}
+            style={[styles.backButton, { borderColor: theme.colors.border }]}
+          >
+            <Icon name="chevronLeft" size={18} />
           </Pressable>
         ) : null}
       </View>
@@ -41,8 +47,10 @@ const styles = StyleSheet.create({
     alignItems: 'flex-end',
   },
   backButton: {
-    width: 32,
-    height: 32,
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    borderWidth: StyleSheet.hairlineWidth,
     alignItems: 'center',
     justifyContent: 'center',
   },

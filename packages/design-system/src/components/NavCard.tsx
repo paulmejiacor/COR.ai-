@@ -19,17 +19,14 @@ export function NavCard({ icon, label, onPress }: NavCardProps) {
         styles.card,
         {
           backgroundColor: theme.colors.surface,
-          borderColor: theme.colors.border,
-          borderRadius: theme.radii.lg,
-          padding: theme.spacing.lg,
-          opacity: pressed ? 0.8 : 1,
+          borderColor: pressed ? theme.colors.borderStrong : theme.colors.border,
+          borderRadius: theme.radii.card,
+          padding: 18,
         },
       ]}
     >
       <Icon name={icon} size={20} color={theme.colors.textPrimary} />
-      <Text variant="bodySmall" style={styles.label}>
-        {label}
-      </Text>
+      <Text variant="bodySmall">{label}</Text>
     </Pressable>
   );
 }
@@ -37,10 +34,8 @@ export function NavCard({ icon, label, onPress }: NavCardProps) {
 const styles = StyleSheet.create({
   card: {
     flexBasis: '47%',
+    height: 100,
     borderWidth: StyleSheet.hairlineWidth,
-    gap: 14,
-  },
-  label: {
-    marginTop: 2,
+    justifyContent: 'space-between',
   },
 });

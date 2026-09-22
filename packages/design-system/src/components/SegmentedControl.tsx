@@ -31,7 +31,7 @@ export function SegmentedControl<T extends string>({ options, value, onChange }:
             onPress={() => onChange(opt.value)}
             style={[
               styles.segment,
-              { borderRadius: theme.radii.sm, backgroundColor: active ? theme.colors.backgroundElevated : 'transparent' },
+              { borderRadius: theme.radii.segment, backgroundColor: active ? theme.colors.backgroundElevated : 'transparent' },
             ]}
           >
             <Text variant="bodySmall" color={active ? 'primary' : 'secondary'} align="center">
@@ -53,6 +53,8 @@ const styles = StyleSheet.create({
   },
   segment: {
     flex: 1,
-    paddingVertical: 8,
+    height: 36,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
 });

@@ -16,4 +16,14 @@ export const radii = {
   lg: 20,
   xl: 28,
   pill: 999,
+  /** Tarjetas (NavCard, tarjetas de escenario, historial). */
+  card: 18,
+  /** Miniaturas. */
+  thumb: 14,
+  /** Lienzos (Detección, Editor). */
+  canvas: 20,
+  /** Controles pequeños (esquinas de marca de agua, tiles de formato). */
+  control: 12,
+  /** Segmentos dentro de un SegmentedControl. */
+  segment: 9,
 } as const;

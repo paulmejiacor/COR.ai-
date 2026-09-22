@@ -20,9 +20,12 @@ export interface ThemeColors {
   surfaceAlt: string;
   border: string;
   borderStrong: string;
+  /** Separador muy sutil (barra inferior fija, pie de tarjeta) — Aloe 8%. */
+  borderSubtle: string;
   textPrimary: string;
   textSecondary: string;
   textInverse: string;
+  /** Acento funcional: sliders, progreso, borde de selección, "completado". Olive — nunca Cypress como texto sobre negro. */
   accent: string;
   accentMuted: string;
   overlay: string;
@@ -30,7 +33,7 @@ export interface ThemeColors {
 
 /**
  * Tema oscuro — identidad primaria de la app (showroom cinematográfico).
- * Semántica de uso, no colores nuevos.
+ * Semántica de uso, no colores nuevos. Ver docs/DESIGN.md (diseño oficial).
  */
 export const darkTheme: ThemeColors = {
   background: brand.black,
@@ -39,11 +42,12 @@ export const darkTheme: ThemeColors = {
   surfaceAlt: brand.cypress,
   border: 'rgba(222, 222, 216, 0.12)', // aloe @ 12%
   borderStrong: 'rgba(222, 222, 216, 0.24)',
+  borderSubtle: 'rgba(222, 222, 216, 0.08)',
   textPrimary: brand.aloe,
   textSecondary: brand.cedar,
   textInverse: brand.black,
-  accent: brand.cypress,
-  accentMuted: brand.olive,
+  accent: brand.olive,
+  accentMuted: brand.cypress,
   overlay: 'rgba(10, 10, 10, 0.72)',
 };
 
@@ -55,11 +59,12 @@ export const lightTheme: ThemeColors = {
   surfaceAlt: brand.cedar,
   border: 'rgba(10, 10, 10, 0.08)',
   borderStrong: 'rgba(10, 10, 10, 0.16)',
+  borderSubtle: 'rgba(10, 10, 10, 0.06)',
   textPrimary: brand.black,
   textSecondary: brand.moss,
   textInverse: brand.aloe,
-  accent: brand.cypress,
-  accentMuted: brand.olive,
+  accent: brand.olive,
+  accentMuted: brand.cypress,
   overlay: 'rgba(222, 222, 216, 0.8)',
 };
 

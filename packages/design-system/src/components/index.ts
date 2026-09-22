@@ -13,3 +13,5 @@ export * from './OptionTile';
 export * from './Slider';
 export * from './SegmentedControl';
 export * from './BeforeAfterSlider';
+export * from './Chip';
+export * from './BottomBar';

@@ -9,7 +9,8 @@ export interface SliderProps {
   onChange: (value: number) => void;
 }
 
-const THUMB_SIZE = 20;
+const THUMB_SIZE = 18;
+const HALO_SIZE = THUMB_SIZE + 8;
 
 /** Control deslizante propio (sin dependencia nativa extra) para escala, altura, rotación y distancia. */
 export function Slider({ value, min, max, onChange }: SliderProps) {
@@ -48,9 +49,19 @@ export function Slider({ value, min, max, onChange }: SliderProps) {
       <View
         pointerEvents="none"
         style={[
+          styles.halo,
+          {
+            backgroundColor: theme.colors.background,
+            left: Math.max(-4, Math.min(trackWidth - HALO_SIZE + 4, ratio * trackWidth - HALO_SIZE / 2)),
+          },
+        ]}
+      />
+      <View
+        pointerEvents="none"
+        style={[
           styles.thumb,
           {
-            backgroundColor: theme.colors.accent,
+            backgroundColor: theme.colors.textPrimary,
             left: Math.max(0, Math.min(trackWidth - THUMB_SIZE, ratio * trackWidth - THUMB_SIZE / 2)),
           },
         ]}
@@ -65,13 +76,19 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   track: {
-    height: 3,
-    borderRadius: 2,
+    height: 2,
+    borderRadius: 1,
   },
   fill: {
     position: 'absolute',
-    height: 3,
-    borderRadius: 2,
+    height: 2,
+    borderRadius: 1,
+  },
+  halo: {
+    position: 'absolute',
+    width: HALO_SIZE,
+    height: HALO_SIZE,
+    borderRadius: HALO_SIZE / 2,
   },
   thumb: {
     position: 'absolute',
