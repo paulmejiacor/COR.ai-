@@ -39,6 +39,12 @@ function withTimeout<T>(promise: Promise<T>, ms: number, label: string): Promise
   });
 }
 
+function getImageSize(uri: string): Promise<{ width: number; height: number }> {
+  return new Promise((resolve, reject) => {
+    Image.getSize(uri, (width, height) => resolve({ width, height }), reject);
+  });
+}
+
 function computeWatermarkBox(
   containerWidth: number,
   containerHeight: number,
@@ -135,7 +141,13 @@ export function ExportScreen({ route, navigation }: Props) {
           ? { width: parseInt(customWidth, 10) || photoWidth, height: parseInt(customHeight, 10) || photoHeight, format: customFormat }
           : undefined;
       const spec = resolveExportSpec(presetId, custom);
-      const cropped = await exportImageToSpec(resultImageUri, photoWidth, photoHeight, spec);
+      // El resultado de la IA no necesariamente sale con el mismo tamaño que
+      // la foto original que mandamos — recortar usando photoWidth/photoHeight
+      // (los de la foto de entrada) calcula un rectángulo que puede caer
+      // fuera de los límites reales de la imagen generada. Medimos el tamaño
+      // real antes de recortar.
+      const { width: realWidth, height: realHeight } = await getImageSize(resultImageUri);
+      const cropped = await exportImageToSpec(resultImageUri, realWidth, realHeight, spec);
 
       if (watermarkVariant === 'none') {
         setExported(cropped);
