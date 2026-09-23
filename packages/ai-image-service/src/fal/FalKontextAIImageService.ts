@@ -1,3 +1,4 @@
+import * as FileSystem from 'expo-file-system/legacy';
 import type {
   SourcePhoto,
   GenerationRequest,
@@ -53,14 +54,19 @@ async function uploadToFal(localUri: string, apiKey: string): Promise<string> {
     file_url: string;
   };
 
-  const fileBlob = await (await fetch(localUri)).blob();
-  const put = await fetch(uploadUrl, {
-    method: 'PUT',
+  // `fetch(localUri).then(r => r.blob())` seguido de otro `fetch` con ese
+  // blob como body es el polyfill de Blob de React Native, que en la
+  // práctica puede subir el archivo vacío o corrupto sin lanzar ningún
+  // error — fal.ai lo rechazaba con "Failed to load the image... corrupted"
+  // aunque la subida "funcionara" del lado de la app. `FileSystem.uploadAsync`
+  // transmite el archivo real desde disco, evitando ese problema.
+  const uploadResult = await FileSystem.uploadAsync(uploadUrl, localUri, {
+    httpMethod: 'PUT',
+    uploadType: FileSystem.FileSystemUploadType.BINARY_CONTENT,
     headers: { 'Content-Type': contentType },
-    body: fileBlob,
   });
-  if (!put.ok) {
-    throw new Error(`No se pudo subir la foto (${put.status})`);
+  if (uploadResult.status < 200 || uploadResult.status >= 300) {
+    throw new Error(`No se pudo subir la foto (${uploadResult.status})`);
   }
 
   return fileUrl;
