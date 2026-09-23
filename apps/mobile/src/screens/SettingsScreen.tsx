@@ -17,10 +17,9 @@ export function SettingsScreen({ navigation }: Props) {
   const [loaded, setLoaded] = useState(false);
 
   useEffect(() => {
-    loadStoredFalKey().then((stored) => {
-      setValue(stored ?? '');
-      setLoaded(true);
-    });
+    loadStoredFalKey()
+      .then((stored) => setValue(stored ?? ''))
+      .finally(() => setLoaded(true));
   }, []);
 
   const activeSource = getCachedFalKeyOverride()
