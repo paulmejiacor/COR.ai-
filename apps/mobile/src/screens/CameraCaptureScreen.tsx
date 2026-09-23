@@ -29,7 +29,7 @@ export function CameraCaptureScreen({ navigation }: Props) {
 
       const normalized = await normalizeCapturedPhoto(photo.uri);
 
-      navigation.replace('Detection', {
+      navigation.replace('SceneSelection', {
         photoUri: normalized.uri,
         photoWidth: normalized.width,
         photoHeight: normalized.height,
@@ -52,7 +52,7 @@ export function CameraCaptureScreen({ navigation }: Props) {
 
       const asset = result.assets[0];
       const normalized = await normalizeCapturedPhoto(asset.uri);
-      navigation.replace('Detection', {
+      navigation.replace('SceneSelection', {
         photoUri: normalized.uri,
         photoWidth: normalized.width,
         photoHeight: normalized.height,

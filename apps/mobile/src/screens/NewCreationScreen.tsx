@@ -36,7 +36,7 @@ export function NewCreationScreen({ navigation }: Props) {
 
       const asset = result.assets[0];
       const normalized = await normalizeCapturedPhoto(asset.uri);
-      navigation.navigate('Detection', {
+      navigation.navigate('SceneSelection', {
         photoUri: normalized.uri,
         photoWidth: normalized.width,
         photoHeight: normalized.height,
