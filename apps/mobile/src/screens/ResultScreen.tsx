@@ -115,8 +115,8 @@ export function ResultScreen({ route, navigation }: Props) {
           <MetaRow label="Vehículo" value={source === 'camera' ? 'Fotografiado con cámara' : 'Seleccionado de galería'} />
           <MetaRow label="Escenario" value={sceneDescription || 'Descripción personalizada'} last />
           <MetaRow label="Resolución" value={`${photoWidth} × ${photoHeight}`} />
-          <MetaRow label="Formato" value={guessFormat(resultImageUri)} last={hasRealAIProvider} />
-          {!hasRealAIProvider ? (
+          <MetaRow label="Formato" value={guessFormat(resultImageUri)} last={hasRealAIProvider()} />
+          {!hasRealAIProvider() ? (
             <MetaRow label="Proveedor de IA" value="Demo (sin conexión real)" last />
           ) : null}
         </Surface>

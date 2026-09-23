@@ -116,7 +116,7 @@ export function ProcessingScreen({ route, navigation }: Props) {
   return (
     <Screen>
       <View style={styles.container}>
-        {!hasRealAIProvider ? (
+        {!hasRealAIProvider() ? (
           <View style={[styles.demoBadge, { borderColor: theme.semantic.danger }]}>
             <Text variant="caption" uppercase style={{ color: theme.semantic.danger }}>
               Vista previa demo · sin IA real

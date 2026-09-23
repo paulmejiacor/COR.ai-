@@ -231,6 +231,10 @@ export function CompositionEditorScreen({ route, navigation }: Props) {
           ) : null}
         </View>
 
+        <Text variant="caption" color="secondary" style={{ marginTop: theme.spacing.sm }}>
+          Vista previa aproximada — la IA vuelve a generar toda la imagen, así que el resultado final no se recorta igual a este recuadro.
+        </Text>
+
         <View style={{ marginTop: theme.spacing.xl, gap: theme.spacing.lg }}>
           <View>
             <Text variant="label" color="secondary" uppercase style={{ marginBottom: theme.spacing.sm }}>

@@ -73,11 +73,7 @@ export function HomeScreen({ navigation }: Props) {
               label="Exportaciones"
               onPress={() => openPlaceholder('Exportaciones', 'Fase 12 — Exportación')}
             />
-            <NavCard
-              icon="sliders"
-              label="Configuración"
-              onPress={() => openPlaceholder('Configuración', 'Fuera del roadmap de fases actual')}
-            />
+            <NavCard icon="sliders" label="Configuración" onPress={() => navigation.navigate('Settings')} />
           </View>
 
           {recent.length > 0 ? (

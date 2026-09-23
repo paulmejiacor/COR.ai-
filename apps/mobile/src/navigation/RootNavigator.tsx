@@ -13,6 +13,7 @@ import { ResultScreen } from '../screens/ResultScreen';
 import { CompareScreen } from '../screens/CompareScreen';
 import { ExportScreen } from '../screens/ExportScreen';
 import { HistoryScreen } from '../screens/HistoryScreen';
+import { SettingsScreen } from '../screens/SettingsScreen';
 import { PlaceholderScreen } from '../screens/PlaceholderScreen';
 import type { RootStackParamList } from './types';
 
@@ -49,6 +50,7 @@ export function RootNavigator() {
         <Stack.Screen name="Compare" component={CompareScreen} />
         <Stack.Screen name="Export" component={ExportScreen} />
         <Stack.Screen name="History" component={HistoryScreen} />
+        <Stack.Screen name="Settings" component={SettingsScreen} />
         <Stack.Screen name="Placeholder" component={PlaceholderScreen} />
       </Stack.Navigator>
     </NavigationContainer>

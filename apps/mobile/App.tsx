@@ -1,3 +1,4 @@
+import { useEffect, useState } from 'react';
 import { View, StyleSheet } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
@@ -11,6 +12,7 @@ import {
 } from '@expo-google-fonts/plus-jakarta-sans';
 import { ThemeProvider } from '@cor/design-system';
 import { RootNavigator } from './src/navigation/RootNavigator';
+import { loadStoredFalKey } from './src/lib/apiKeyStore';
 
 export default function App() {
   const [fontsLoaded] = useFonts({
@@ -20,8 +22,13 @@ export default function App() {
     PlusJakartaSans_700Bold,
     PlusJakartaSans_800ExtraBold,
   });
+  const [apiKeyReady, setApiKeyReady] = useState(false);
 
-  if (!fontsLoaded) {
+  useEffect(() => {
+    loadStoredFalKey().finally(() => setApiKeyReady(true));
+  }, []);
+
+  if (!fontsLoaded || !apiKeyReady) {
     return <View style={styles.loading} />;
   }
 
