@@ -30,16 +30,20 @@ export function CompositionEditorScreen({ route, navigation }: Props) {
   const [settings, setSettings] = useState<CompositionSettings>(DEFAULT_COMPOSITION_SETTINGS);
   const [manualOffset, setManualOffset] = useState({ x: 0, y: 0 });
   const [preview, setPreview] = useState({ width: 0, height: 0 });
-  const [sceneAspectRatio, setSceneAspectRatio] = useState(4 / 3);
+  // 16:9 como respaldo — mucho más cercano a la proporción real de los 3
+  // escenarios de COR (~1.78-1.81) que el 4:3 anterior, por si en algún
+  // dispositivo `resolveAssetSource` no trae las dimensiones (ver abajo).
+  const [sceneAspectRatio, setSceneAspectRatio] = useState(16 / 9);
 
   useEffect(() => {
     if (!sceneThumbnail) {
-      setSceneAspectRatio(4 / 3);
+      setSceneAspectRatio(16 / 9);
       return;
     }
-    // Escenarios remotos (Unsplash): no traen dimensiones, hay que consultarlas.
+    let cancelled = false;
+
+    // Escenarios remotos o personalizados (uri): no traen dimensiones, hay que consultarlas.
     if (typeof sceneThumbnail === 'object' && 'uri' in sceneThumbnail && sceneThumbnail.uri) {
-      let cancelled = false;
       Image.getSize(
         sceneThumbnail.uri,
         (width, height) => {
@@ -51,11 +55,25 @@ export function CompositionEditorScreen({ route, navigation }: Props) {
         cancelled = true;
       };
     }
-    // Escenarios locales (require): la proporción real viene resuelta por Metro sin red.
+
+    // Escenarios locales (require): Metro normalmente resuelve width/height sin
+    // red, pero si un dispositivo no las trae, medimos con getSize sobre el uri
+    // resuelto en vez de quedarnos con el respaldo 16:9 genérico.
     const resolved = Image.resolveAssetSource(sceneThumbnail);
     if (resolved?.width && resolved?.height) {
       setSceneAspectRatio(clamp(resolved.width / resolved.height, 0.6, 2));
+    } else if (resolved?.uri) {
+      Image.getSize(
+        resolved.uri,
+        (width, height) => {
+          if (!cancelled && width > 0 && height > 0) setSceneAspectRatio(clamp(width / height, 0.6, 2));
+        },
+        () => {}
+      );
     }
+    return () => {
+      cancelled = true;
+    };
   }, [sceneThumbnail]);
 
   const settingsRef = useRef(settings);
