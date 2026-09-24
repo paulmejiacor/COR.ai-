@@ -82,13 +82,23 @@ async function uploadToFal(sourceUri: string, apiKey: string): Promise<string> {
   return fileUrl;
 }
 
+/**
+ * Única excepción deliberada a "no toques el vehículo": la placa real del
+ * cliente no debe aparecer en fotos de marketing del showroom — se pide
+ * reemplazarla por una placa genérica de COR, igual en ambos prompts.
+ */
+const PLATE_INSTRUCTION =
+  'The only exception to keeping the vehicle unchanged: replace any visible license plate with a ' +
+  'clean dealer plate that reads "COR" in bold modern lettering, centered on a plain white plate, ' +
+  'matching the real plate\'s size, position and perspective. Apply this to every visible plate.';
+
 function buildEditPrompt(scenePrompt: string): string {
   return (
     `Replace only the background and environment of this photo with: ${scenePrompt}. ` +
     'Keep the vehicle completely unchanged: exact same color, shape, badges, wheels, proportions, ' +
     'position and angle in the frame. Match the lighting, reflections and shadows on the vehicle to ' +
     'the new environment so the composite looks photorealistic. Do not alter, restyle, or redesign ' +
-    'the vehicle in any way.'
+    `the vehicle in any way. ${PLATE_INSTRUCTION}`
   );
 }
 
@@ -106,7 +116,7 @@ function buildMultiEditPrompt(scenePrompt: string): string {
     'Keep the vehicle completely unchanged: exact same color, shape, badges, wheels, proportions, ' +
     'position and angle. Match the lighting, reflections and shadows on the vehicle to the environment ' +
     'from the second image so the composite looks photorealistic. Do not alter, restyle, or redesign ' +
-    'the vehicle in any way.'
+    `the vehicle in any way. ${PLATE_INSTRUCTION}`
   );
 }
 
