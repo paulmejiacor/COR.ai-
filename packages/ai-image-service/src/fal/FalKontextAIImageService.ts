@@ -82,23 +82,24 @@ async function uploadToFal(sourceUri: string, apiKey: string): Promise<string> {
   return fileUrl;
 }
 
-/**
- * Única excepción deliberada a "no toques el vehículo": la placa real del
- * cliente no debe aparecer en fotos de marketing del showroom — se pide
- * reemplazarla por una placa genérica de COR, igual en ambos prompts.
- */
-const PLATE_INSTRUCTION =
-  'The only exception to keeping the vehicle unchanged: replace any visible license plate with a ' +
-  'clean dealer plate that reads "COR" in bold modern lettering, centered on a plain white plate, ' +
-  'matching the real plate\'s size, position and perspective. Apply this to every visible plate.';
-
 function buildEditPrompt(scenePrompt: string): string {
+  // Formato de checklist numerado en vez de una sola oración larga: en
+  // pruebas reales, el modelo aplicaba el fondo o la placa de forma
+  // inconsistente (a veces mantenía el fondo original, a veces dejaba la
+  // placa real sin tocar) — separar los cambios obligatorios como pasos
+  // explícitos y marcar "do not skip" mejora qué tan seguido los cumple.
   return (
-    `Replace only the background and environment of this photo with: ${scenePrompt}. ` +
-    'Keep the vehicle completely unchanged: exact same color, shape, badges, wheels, proportions, ' +
-    'position and angle in the frame. Match the lighting, reflections and shadows on the vehicle to ' +
-    'the new environment so the composite looks photorealistic. Do not alter, restyle, or redesign ' +
-    `the vehicle in any way. ${PLATE_INSTRUCTION}`
+    'You must make exactly these two changes to this photo, and nothing else:\n' +
+    `1. Background: replace the entire background and environment with: ${scenePrompt}. ` +
+    'Do not keep any part of the original background — floors, walls, signage, furniture, everything behind ' +
+    'and around the vehicle must become the new environment.\n' +
+    '2. License plate: replace every visible license plate with a plain white dealer plate that reads ' +
+    '"COR" in bold black modern lettering, centered, matching the original plate\'s size, position and ' +
+    'perspective. Do not leave the original plate text visible.\n' +
+    'Do not skip either required change. Everything else about the vehicle stays exactly the same: same ' +
+    'color, shape, badges, wheels, proportions, position and angle in the frame. Match the lighting, ' +
+    'reflections and shadows on the vehicle to the new environment so the composite looks photorealistic. ' +
+    'Do not alter, restyle, or redesign the vehicle itself in any way.'
   );
 }
 
@@ -113,10 +114,12 @@ function buildMultiEditPrompt(scenePrompt: string): string {
     'Place the vehicle from the first image into the exact environment, architecture, materials and ' +
     'lighting shown in the second image — reproduce that background as faithfully as possible, do not ' +
     `invent a different environment. Additional context for the scene: ${scenePrompt}. ` +
+    'Also replace every visible license plate with a plain white dealer plate that reads "COR" in bold ' +
+    'black lettering, matching the original plate\'s size and position. ' +
     'Keep the vehicle completely unchanged: exact same color, shape, badges, wheels, proportions, ' +
     'position and angle. Match the lighting, reflections and shadows on the vehicle to the environment ' +
     'from the second image so the composite looks photorealistic. Do not alter, restyle, or redesign ' +
-    `the vehicle in any way. ${PLATE_INSTRUCTION}`
+    'the vehicle in any way.'
   );
 }
 
@@ -174,7 +177,13 @@ export class FalKontextAIImageService implements AIImageService {
     const response = await fetch(`${RUN_BASE}/${MODEL_SINGLE}`, {
       method: 'POST',
       headers: { Authorization: `Key ${this.apiKey}`, 'Content-Type': 'application/json' },
-      body: JSON.stringify({ prompt: buildEditPrompt(scenePrompt), image_url: vehicleUrl }),
+      // guidance_scale por defecto es 3.5 (rango 1-20) — subirlo hace que el
+      // modelo siga las instrucciones del prompt más al pie de la letra. En
+      // pruebas reales el fondo y la placa se aplicaban de forma inconsistente
+      // (a veces sí, a veces no, con la misma foto e instrucciones); 7 es un
+      // punto medio razonable para mejorar esa consistencia sin perder tanto
+      // fotorrealismo como en valores muy altos.
+      body: JSON.stringify({ prompt: buildEditPrompt(scenePrompt), image_url: vehicleUrl, guidance_scale: 7 }),
     });
 
     if (!response.ok) {
