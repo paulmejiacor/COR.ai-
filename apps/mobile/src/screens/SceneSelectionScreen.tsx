@@ -6,6 +6,7 @@ import { useFocusEffect } from '@react-navigation/native';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { Screen, Header, Text, SectionLabel, Button, Icon, useTheme } from '@cor/design-system';
 import { listCustomScenes, addCustomScene, type CustomScene } from '@cor/storage';
+import { DEFAULT_COMPOSITION_SETTINGS } from '@cor/shared-types';
 import type { RootStackParamList } from '../navigation/types';
 import { SCENE_PRESETS, SCENE_CATEGORY_LABEL, SCENE_CATEGORY_ORDER, type UIScenePreset } from '../data/scenePresets';
 
@@ -103,15 +104,19 @@ export function SceneSelectionScreen({ route, navigation }: Props) {
   };
 
   const handleContinue = () => {
-    const selectedPreset = allPresets.find((p) => p.id === selectedId);
-    navigation.navigate('CompositionEditor', {
+    // El Editor de composición se quitó del flujo: la posición/escala que se
+    // ajustaba ahí nunca se le mandaba a la IA (Kontext solo recibe la foto
+    // completa + el texto del escenario), así que esa pantalla no cambiaba
+    // nada del resultado — era un paso de más entre elegir el escenario y
+    // que la IA empezara a trabajar.
+    navigation.navigate('Processing', {
       photoUri,
       photoWidth,
       photoHeight,
       source,
       angle,
       sceneDescription: description.trim() || undefined,
-      sceneThumbnail: selectedPreset?.thumbnail,
+      composition: DEFAULT_COMPOSITION_SETTINGS,
     });
   };
 
