@@ -30,6 +30,8 @@ export type CompositionEditorParams = CapturedPhotoParams & {
 
 export type ProcessingParams = CapturedPhotoParams & {
   sceneDescription?: string;
+  /** URI local de la foto del escenario elegido, para usarla como referencia visual real ante la IA (no solo texto). */
+  sceneReferenceUri?: string;
   composition: CompositionSettings;
 };
 

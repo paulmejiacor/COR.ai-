@@ -23,4 +23,12 @@ export interface Scene {
   prompt: string;
   /** Prompt after COR Prompt Assist expands it into a precise visual description. */
   assistedPrompt?: string;
+  /**
+   * URI local de la foto de referencia del escenario elegido (uno de los
+   * spots reales de COR, o un escenario personalizado). Cuando está
+   * presente, el proveedor de IA la sube junto con la foto del vehículo y
+   * la usa como referencia visual real del fondo — no solo el texto de
+   * `prompt`.
+   */
+  referenceImageUri?: string;
 }

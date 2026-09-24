@@ -109,6 +109,20 @@ export function SceneSelectionScreen({ route, navigation }: Props) {
     // completa + el texto del escenario), así que esa pantalla no cambiaba
     // nada del resultado — era un paso de más entre elegir el escenario y
     // que la IA empezara a trabajar.
+    const selectedPreset = allPresets.find((p) => p.id === selectedId);
+    // Resuelve el thumbnail (require local o { uri } de un escenario
+    // personalizado) a una URI real que se pueda subir — así la IA recibe
+    // la foto de referencia del spot elegido, no solo su descripción de
+    // texto, y el resultado se parece de verdad al espacio físico de COR.
+    // resolveAssetSource no existe en todas las plataformas (ej. web) — si
+    // falla, seguimos sin referencia en vez de trabar la navegación.
+    let sceneReferenceUri: string | undefined;
+    try {
+      sceneReferenceUri = selectedPreset ? Image.resolveAssetSource?.(selectedPreset.thumbnail)?.uri : undefined;
+    } catch {
+      sceneReferenceUri = undefined;
+    }
+
     navigation.navigate('Processing', {
       photoUri,
       photoWidth,
@@ -116,6 +130,7 @@ export function SceneSelectionScreen({ route, navigation }: Props) {
       source,
       angle,
       sceneDescription: description.trim() || undefined,
+      sceneReferenceUri,
       composition: DEFAULT_COMPOSITION_SETTINGS,
     });
   };

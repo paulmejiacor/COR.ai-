@@ -11,7 +11,8 @@ import type { AIImageService, DetectVehicleResult } from '../AIImageService';
 
 const REST_BASE = 'https://rest.fal.ai';
 const RUN_BASE = 'https://fal.run';
-const MODEL = 'fal-ai/flux-pro/kontext';
+const MODEL_SINGLE = 'fal-ai/flux-pro/kontext';
+const MODEL_MULTI = 'fal-ai/flux-pro/kontext/multi';
 
 const STAGE_ORDER: GenerationStage[] = [
   'analyzing_vehicle',
@@ -82,6 +83,24 @@ function buildEditPrompt(scenePrompt: string): string {
   );
 }
 
+/**
+ * Con una foto de referencia real del escenario (uno de los spots de COR),
+ * se le pide al modelo que reproduzca ESA foto como fondo, no solo una
+ * aproximación por texto — `scenePrompt` queda como apoyo/detalle extra.
+ */
+function buildMultiEditPrompt(scenePrompt: string): string {
+  return (
+    'The first image shows a vehicle. The second image shows a real location. ' +
+    'Place the vehicle from the first image into the exact environment, architecture, materials and ' +
+    'lighting shown in the second image — reproduce that background as faithfully as possible, do not ' +
+    `invent a different environment. Additional context for the scene: ${scenePrompt}. ` +
+    'Keep the vehicle completely unchanged: exact same color, shape, badges, wheels, proportions, ' +
+    'position and angle. Match the lighting, reflections and shadows on the vehicle to the environment ' +
+    'from the second image so the composite looks photorealistic. Do not alter, restyle, or redesign ' +
+    'the vehicle in any way.'
+  );
+}
+
 interface FalKontextResponse {
   images?: Array<{ url: string; width: number; height: number; content_type: string }>;
 }
@@ -120,18 +139,29 @@ export class FalKontextAIImageService implements AIImageService {
     const emit = (index: number) => onProgress?.({ stage: STAGE_ORDER[index], progress: (index + 1) / STAGE_ORDER.length });
 
     emit(0);
-    const fileUrl = await uploadToFal(request.vehicle.sourcePhoto.uri, this.apiKey);
+    const vehicleUrl = await uploadToFal(request.vehicle.sourcePhoto.uri, this.apiKey);
+    const referenceUri = request.scene.referenceImageUri;
+    const sceneUrl = referenceUri ? await uploadToFal(referenceUri, this.apiKey) : undefined;
 
     emit(1);
     const scenePrompt = request.scene.assistedPrompt || request.scene.prompt || 'a luxury automotive showroom';
-    const prompt = buildEditPrompt(scenePrompt);
 
     emit(2);
-    const response = await fetch(`${RUN_BASE}/${MODEL}`, {
-      method: 'POST',
-      headers: { Authorization: `Key ${this.apiKey}`, 'Content-Type': 'application/json' },
-      body: JSON.stringify({ prompt, image_url: fileUrl }),
-    });
+    // Con foto de referencia real del escenario: se usa el endpoint
+    // multi-imagen para que la IA reproduzca ESA foto como fondo, en vez de
+    // solo aproximarla por texto (kontext de una sola imagen no tiene forma
+    // de "ver" un segundo escenario).
+    const response = sceneUrl
+      ? await fetch(`${RUN_BASE}/${MODEL_MULTI}`, {
+          method: 'POST',
+          headers: { Authorization: `Key ${this.apiKey}`, 'Content-Type': 'application/json' },
+          body: JSON.stringify({ prompt: buildMultiEditPrompt(scenePrompt), image_urls: [vehicleUrl, sceneUrl] }),
+        })
+      : await fetch(`${RUN_BASE}/${MODEL_SINGLE}`, {
+          method: 'POST',
+          headers: { Authorization: `Key ${this.apiKey}`, 'Content-Type': 'application/json' },
+          body: JSON.stringify({ prompt: buildEditPrompt(scenePrompt), image_url: vehicleUrl }),
+        });
 
     if (!response.ok) {
       const text = await response.text().catch(() => '');

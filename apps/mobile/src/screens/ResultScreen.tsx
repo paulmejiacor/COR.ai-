@@ -68,11 +68,20 @@ function buildProject(params: Props['route']['params']): Project {
 }
 
 export function ResultScreen({ route, navigation }: Props) {
-  const { photoUri, photoWidth, photoHeight, source, sceneDescription, composition, resultImageUri } = route.params;
+  const { photoUri, photoWidth, photoHeight, source, sceneDescription, sceneReferenceUri, composition, resultImageUri } =
+    route.params;
   const theme = useTheme();
 
   const handleRegenerate = () =>
-    navigation.replace('Processing', { photoUri, photoWidth, photoHeight, source, sceneDescription, composition });
+    navigation.replace('Processing', {
+      photoUri,
+      photoWidth,
+      photoHeight,
+      source,
+      sceneDescription,
+      sceneReferenceUri,
+      composition,
+    });
 
   const handleNewVersion = () => navigation.navigate('SceneSelection', { photoUri, photoWidth, photoHeight, source });
 
