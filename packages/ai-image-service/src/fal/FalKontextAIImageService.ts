@@ -38,7 +38,16 @@ function guessContentType(uri: string): string {
   return 'image/jpeg';
 }
 
-async function uploadToFal(localUri: string, apiKey: string): Promise<string> {
+async function uploadToFal(sourceUri: string, apiKey: string): Promise<string> {
+  // Las fotos de la cámara/galería siempre llegan como file:// locales, pero
+  // el thumbnail de un escenario embebido (require) se resuelve, en modo
+  // desarrollo, a una URL http(s) del propio servidor de Metro — uploadAsync
+  // necesita un archivo real en disco, no una URL remota, así que primero se
+  // descarga a un archivo temporal.
+  const localUri = /^https?:\/\//i.test(sourceUri)
+    ? (await FileSystem.downloadAsync(sourceUri, `${FileSystem.cacheDirectory}fal_upload_${Date.now()}`)).uri
+    : sourceUri;
+
   const contentType = guessContentType(localUri);
   const fileName = `photo_${Date.now()}.${contentType === 'image/png' ? 'png' : contentType === 'image/webp' ? 'webp' : 'jpg'}`;
 
