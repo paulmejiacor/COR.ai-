@@ -160,6 +160,12 @@ export function ExportScreen({ route, navigation }: Props) {
           ? await reencodeImage(resultImageUri, spec.format, spec.quality)
           : await exportImageToSpec(resultImageUri, realWidth, realHeight, spec);
 
+      // Para "Original" el destino de la marca de agua debe ser la resolución
+      // real de la imagen, no el 4096x4096 fijo del preset: pedirle a
+      // captureRef que rasterice más grande de lo que la vista realmente
+      // tiene solo produce una imagen borrosa "estirada", no más detalle.
+      const captureTarget = presetId === 'original' ? { width: realWidth, height: realHeight } : { width: spec.width, height: spec.height };
+
       if (watermarkVariant === 'none') {
         setExported(cropped);
         return;
@@ -177,7 +183,7 @@ export function ExportScreen({ route, navigation }: Props) {
       // además un límite de tiempo: si algo no responde, se entrega igual la
       // imagen recortada (sin marca) en vez de dejar la exportación trabada.
       try {
-        setCaptureSpec({ width: spec.width, height: spec.height });
+        setCaptureSpec(captureTarget);
         const baseReady = new Promise<void>((resolve) => {
           captureImageLoadResolver.current = resolve;
         });
@@ -190,7 +196,7 @@ export function ExportScreen({ route, navigation }: Props) {
         await new Promise((resolve) => setTimeout(resolve, 250));
 
         const rawUri = await withTimeout(
-          captureRef(hiddenViewRef, { format: 'png', quality: 1, result: 'tmpfile', width: spec.width, height: spec.height }),
+          captureRef(hiddenViewRef, { format: 'png', quality: 1, result: 'tmpfile', width: captureTarget.width, height: captureTarget.height }),
           8000,
           'capturar la marca de agua'
         );
