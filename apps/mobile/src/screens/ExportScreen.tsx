@@ -1,7 +1,8 @@
 import { useRef, useState } from 'react';
-import { Alert, Image, Pressable, ScrollView, TextInput, View, StyleSheet } from 'react-native';
+import { Alert, Image, Platform, Pressable, ScrollView, TextInput, View, StyleSheet } from 'react-native';
 import { captureRef } from 'react-native-view-shot';
 import * as MediaLibrary from 'expo-media-library/legacy';
+import * as FileSystem from 'expo-file-system/legacy';
 import * as Sharing from 'expo-sharing';
 import type { ImageResult } from 'expo-image-manipulator';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
@@ -102,7 +103,10 @@ export function ExportScreen({ route, navigation }: Props) {
   const { resultImageUri, photoWidth, photoHeight } = route.params;
   const theme = useTheme();
 
-  const [presetId, setPresetId] = useState<ExportPresetId>('instagram_post');
+  // "Original" conserva la composición completa que generó la IA — un preset
+  // cuadrado como punto de partida recorta agresivamente una escena panorámica,
+  // dejando "sin aire" alrededor del auto antes de que el usuario elija algo.
+  const [presetId, setPresetId] = useState<ExportPresetId>('original');
   const [customWidth, setCustomWidth] = useState(String(photoWidth));
   const [customHeight, setCustomHeight] = useState(String(photoHeight));
   const [customFormat, setCustomFormat] = useState<ExportFileFormat>('jpg');
@@ -148,7 +152,13 @@ export function ExportScreen({ route, navigation }: Props) {
       // fuera de los límites reales de la imagen generada. Medimos el tamaño
       // real antes de recortar.
       const { width: realWidth, height: realHeight } = await getImageSize(resultImageUri);
-      const cropped = await exportImageToSpec(resultImageUri, realWidth, realHeight, spec);
+      // "Original" debe conservar la composición completa que generó la IA —
+      // el preset trae un target cuadrado (para su calidad/formato), pero acá
+      // se ignora ese ancho/alto y solo se reencoda, sin recortar nada.
+      const cropped =
+        presetId === 'original'
+          ? await reencodeImage(resultImageUri, spec.format, spec.quality)
+          : await exportImageToSpec(resultImageUri, realWidth, realHeight, spec);
 
       if (watermarkVariant === 'none') {
         setExported(cropped);
@@ -201,6 +211,7 @@ export function ExportScreen({ route, navigation }: Props) {
 
   const handleDownloadExported = async () => {
     if (!exported) return;
+
     try {
       const { status } = await MediaLibrary.requestPermissionsAsync();
       if (status === 'granted') {
@@ -211,18 +222,35 @@ export function ExportScreen({ route, navigation }: Props) {
     } catch {
       // Expo Go ya no recibe acceso completo a la galería en Android (política
       // de Google Play) — MediaLibrary puede fallar aquí sin que el permiso en
-      // sí esté denegado. En vez de dejarlo trabado, caemos al selector nativo
-      // de compartir, que sí funciona en Expo Go y permite guardar igual
-      // ("Guardar en Archivos"/"Guardar en Fotos" según el dispositivo).
+      // sí esté denegado. Seguimos con una vía que sí guarda un archivo real
+      // en el teléfono en vez de solo abrir el selector de compartir.
+    }
+
+    if (Platform.OS === 'android') {
+      try {
+        const permissions = await FileSystem.StorageAccessFramework.requestDirectoryPermissionsAsync();
+        if (permissions.granted) {
+          const ext = exported.uri.split('.').pop()?.toLowerCase() ?? 'jpg';
+          const mimeType = ext === 'png' ? 'image/png' : ext === 'webp' ? 'image/webp' : 'image/jpeg';
+          const destUri = await FileSystem.StorageAccessFramework.createFileAsync(
+            permissions.directoryUri,
+            `COR_${Date.now()}`,
+            mimeType
+          );
+          const base64 = await FileSystem.readAsStringAsync(exported.uri, { encoding: 'base64' });
+          await FileSystem.writeAsStringAsync(destUri, base64, { encoding: 'base64' });
+          Alert.alert('Descargada', 'La imagen se guardó en la carpeta que elegiste.');
+          return;
+        }
+      } catch {
+        // Sigue al respaldo de compartir si el picker de carpeta falla o se cancela.
+      }
     }
 
     try {
       const available = await Sharing.isAvailableAsync();
       if (!available) {
-        Alert.alert(
-          'No se pudo guardar',
-          'Este dispositivo no permite guardar directamente en la galería desde Expo Go. Usa "Compartir" desde el Resultado.'
-        );
+        Alert.alert('No se pudo guardar', 'Este dispositivo no permite guardar ni compartir la imagen desde aquí.');
         return;
       }
       await Sharing.shareAsync(exported.uri);
