@@ -2,6 +2,7 @@ import { useRef, useState } from 'react';
 import { Alert, Image, Pressable, ScrollView, TextInput, View, StyleSheet } from 'react-native';
 import { captureRef } from 'react-native-view-shot';
 import * as MediaLibrary from 'expo-media-library/legacy';
+import * as Sharing from 'expo-sharing';
 import type { ImageResult } from 'expo-image-manipulator';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import {
@@ -202,12 +203,29 @@ export function ExportScreen({ route, navigation }: Props) {
     if (!exported) return;
     try {
       const { status } = await MediaLibrary.requestPermissionsAsync();
-      if (status !== 'granted') {
-        Alert.alert('Permiso necesario', 'Activa el permiso de fotos para poder guardar la imagen en tu galería.');
+      if (status === 'granted') {
+        await MediaLibrary.saveToLibraryAsync(exported.uri);
+        Alert.alert('Descargada', 'La imagen se guardó en tu galería.');
         return;
       }
-      await MediaLibrary.saveToLibraryAsync(exported.uri);
-      Alert.alert('Descargada', 'La imagen se guardó en tu galería.');
+    } catch {
+      // Expo Go ya no recibe acceso completo a la galería en Android (política
+      // de Google Play) — MediaLibrary puede fallar aquí sin que el permiso en
+      // sí esté denegado. En vez de dejarlo trabado, caemos al selector nativo
+      // de compartir, que sí funciona en Expo Go y permite guardar igual
+      // ("Guardar en Archivos"/"Guardar en Fotos" según el dispositivo).
+    }
+
+    try {
+      const available = await Sharing.isAvailableAsync();
+      if (!available) {
+        Alert.alert(
+          'No se pudo guardar',
+          'Este dispositivo no permite guardar directamente en la galería desde Expo Go. Usa "Compartir" desde el Resultado.'
+        );
+        return;
+      }
+      await Sharing.shareAsync(exported.uri);
     } catch (error) {
       Alert.alert('No se pudo descargar', String(error));
     }
