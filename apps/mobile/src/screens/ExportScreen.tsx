@@ -70,13 +70,15 @@ function computeWatermarkBox(
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Export'>;
 
+// Se redujo de 7 opciones a 3: la mayoría eran variaciones del mismo
+// tamaño (Instagram Post y WhatsApp son ambos 1080×1080; Facebook y Web
+// son casi la misma proporción) — solo agregaban ruido a elegir sin
+// cambiar nada útil. "Original" es la recomendada: no recorta el auto, no
+// pierde calidad, y sirve igual para web, Instagram o WhatsApp porque
+// ninguno de esos exige ya una medida exacta.
 const FORMAT_TILES: Array<{ id: ExportPresetId; label: string; subtitle: string }> = [
-  { id: 'instagram_post', label: 'Instagram Post', subtitle: '1080 × 1080' },
-  { id: 'instagram_story', label: 'Instagram Story', subtitle: '1080 × 1920' },
-  { id: 'web', label: 'Web', subtitle: '1600 × 900' },
-  { id: 'whatsapp', label: 'WhatsApp', subtitle: '1080 × 1080' },
-  { id: 'facebook', label: 'Facebook', subtitle: '1200 × 630' },
-  { id: 'original', label: 'Original', subtitle: 'Alta resolución' },
+  { id: 'original', label: 'Original', subtitle: 'Sin recorte · recomendada' },
+  { id: 'instagram_post', label: 'Cuadrado', subtitle: '1080 × 1080' },
   { id: 'custom', label: 'Personalizado', subtitle: 'A tu medida' },
 ];
 
