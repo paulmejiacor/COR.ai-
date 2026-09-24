@@ -159,28 +159,23 @@ export class FalKontextAIImageService implements AIImageService {
 
     emit(0);
     const vehicleUrl = await uploadToFal(request.vehicle.sourcePhoto.uri, this.apiKey);
-    const referenceUri = request.scene.referenceImageUri;
-    const sceneUrl = referenceUri ? await uploadToFal(referenceUri, this.apiKey) : undefined;
 
     emit(1);
     const scenePrompt = request.scene.assistedPrompt || request.scene.prompt || 'a luxury automotive showroom';
 
     emit(2);
-    // Con foto de referencia real del escenario: se usa el endpoint
-    // multi-imagen para que la IA reproduzca ESA foto como fondo, en vez de
-    // solo aproximarla por texto (kontext de una sola imagen no tiene forma
-    // de "ver" un segundo escenario).
-    const response = sceneUrl
-      ? await fetch(`${RUN_BASE}/${MODEL_MULTI}`, {
-          method: 'POST',
-          headers: { Authorization: `Key ${this.apiKey}`, 'Content-Type': 'application/json' },
-          body: JSON.stringify({ prompt: buildMultiEditPrompt(scenePrompt), image_urls: [vehicleUrl, sceneUrl] }),
-        })
-      : await fetch(`${RUN_BASE}/${MODEL_SINGLE}`, {
-          method: 'POST',
-          headers: { Authorization: `Key ${this.apiKey}`, 'Content-Type': 'application/json' },
-          body: JSON.stringify({ prompt: buildEditPrompt(scenePrompt), image_url: vehicleUrl }),
-        });
+    // DESACTIVADO por ahora: el endpoint multi-imagen (mandar también la foto
+    // real del escenario) confirmó en pruebas reales cambiar el auto por
+    // completo — un Maserati Grecale salió como GranTurismo, un VW Kardian
+    // salió con otra forma. Para un showroom, mostrar un auto distinto al
+    // que se vende es inaceptable, así que se vuelve a una sola imagen
+    // (la que sí preservó el auto correctamente en todas las pruebas
+    // anteriores) hasta poder investigar esto con más cuidado.
+    const response = await fetch(`${RUN_BASE}/${MODEL_SINGLE}`, {
+      method: 'POST',
+      headers: { Authorization: `Key ${this.apiKey}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ prompt: buildEditPrompt(scenePrompt), image_url: vehicleUrl }),
+    });
 
     if (!response.ok) {
       const text = await response.text().catch(() => '');
