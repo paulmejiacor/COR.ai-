@@ -28,7 +28,7 @@ async function ensureCustomScenesDir(): Promise<string> {
 }
 
 export function SceneSelectionScreen({ route, navigation }: Props) {
-  const { photoUri, photoWidth, photoHeight, source, angle } = route.params;
+  const { photoUri, photoWidth, photoHeight, source, angle, batchPhotos } = route.params;
   const theme = useTheme();
   const [description, setDescription] = useState('');
   const [selectedId, setSelectedId] = useState<string | null>(null);
@@ -123,6 +123,14 @@ export function SceneSelectionScreen({ route, navigation }: Props) {
       sceneReferenceUri = undefined;
     }
 
+    if (batchPhotos && batchPhotos.length > 1) {
+      navigation.navigate('BatchProcessing', {
+        photos: batchPhotos,
+        sceneDescription: description.trim() || undefined,
+      });
+      return;
+    }
+
     navigation.navigate('Processing', {
       photoUri,
       photoWidth,
@@ -146,6 +154,11 @@ export function SceneSelectionScreen({ route, navigation }: Props) {
         <Text variant="title" style={{ marginTop: theme.spacing.md }}>
           ¿Dónde quieres colocar tu vehículo?
         </Text>
+        {batchPhotos && batchPhotos.length > 1 ? (
+          <Text variant="bodySmall" color="accent" style={{ marginTop: theme.spacing.xs }}>
+            {batchPhotos.length} fotos seleccionadas — se les aplicará el mismo escenario.
+          </Text>
+        ) : null}
 
         <View
           style={[
@@ -230,7 +243,11 @@ export function SceneSelectionScreen({ route, navigation }: Props) {
         })}
 
         <View style={{ marginTop: theme.spacing.xxl }}>
-          <Button label="CONTINUAR" fullWidth onPress={handleContinue} />
+          <Button
+            label={batchPhotos && batchPhotos.length > 1 ? `PROCESAR ${batchPhotos.length} FOTOS` : 'CONTINUAR'}
+            fullWidth
+            onPress={handleContinue}
+          />
         </View>
       </ScrollView>
     </Screen>

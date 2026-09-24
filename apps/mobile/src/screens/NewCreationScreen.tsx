@@ -31,16 +31,18 @@ export function NewCreationScreen({ navigation }: Props) {
       const result = await ImagePicker.launchImageLibraryAsync({
         mediaTypes: ['images'],
         quality: 0.9,
+        allowsMultipleSelection: true,
       });
       if (result.canceled || result.assets.length === 0) return;
 
-      const asset = result.assets[0];
-      const normalized = await normalizeCapturedPhoto(asset.uri);
+      const normalized = await Promise.all(result.assets.map((asset) => normalizeCapturedPhoto(asset.uri)));
+      const [first, ...rest] = normalized;
       navigation.navigate('SceneSelection', {
-        photoUri: normalized.uri,
-        photoWidth: normalized.width,
-        photoHeight: normalized.height,
+        photoUri: first.uri,
+        photoWidth: first.width,
+        photoHeight: first.height,
         source: 'gallery',
+        batchPhotos: rest.length > 0 ? normalized.map((p) => ({ uri: p.uri, width: p.width, height: p.height })) : undefined,
       });
     } finally {
       setPickingGallery(false);

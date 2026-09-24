@@ -12,6 +12,8 @@ import { ProcessingScreen } from '../screens/ProcessingScreen';
 import { ResultScreen } from '../screens/ResultScreen';
 import { CompareScreen } from '../screens/CompareScreen';
 import { ExportScreen } from '../screens/ExportScreen';
+import { BatchProcessingScreen } from '../screens/BatchProcessingScreen';
+import { BatchResultScreen } from '../screens/BatchResultScreen';
 import { HistoryScreen } from '../screens/HistoryScreen';
 import { SettingsScreen } from '../screens/SettingsScreen';
 import { PlaceholderScreen } from '../screens/PlaceholderScreen';
@@ -49,6 +51,8 @@ export function RootNavigator() {
         <Stack.Screen name="Result" component={ResultScreen} />
         <Stack.Screen name="Compare" component={CompareScreen} />
         <Stack.Screen name="Export" component={ExportScreen} />
+        <Stack.Screen name="BatchProcessing" component={BatchProcessingScreen} />
+        <Stack.Screen name="BatchResult" component={BatchResultScreen} />
         <Stack.Screen name="History" component={HistoryScreen} />
         <Stack.Screen name="Settings" component={SettingsScreen} />
         <Stack.Screen name="Placeholder" component={PlaceholderScreen} />
