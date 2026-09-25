@@ -261,8 +261,8 @@ export function PlateBrandingScreen({ route, navigation }: Props) {
           Coloca el logo sobre la placa
         </Text>
         <Text variant="bodySmall" color="secondary" style={{ marginTop: theme.spacing.xs, marginBottom: theme.spacing.lg }}>
-          Arrastra el logo con un dedo, pellizca con dos para escalarlo, y usa el control de abajo para rotarlo hasta que
-          quede alineado con la placa.
+          Arrastra el logo con un dedo para moverlo, y usa los controles de abajo para ajustar su tamaño y rotación hasta
+          que quede alineado con la placa.
         </Text>
 
         <View
@@ -292,6 +292,20 @@ export function PlateBrandingScreen({ route, navigation }: Props) {
         </View>
 
         <View style={{ marginTop: theme.spacing.xl }}>
+          <View style={styles.sliderHeader}>
+            <Text variant="label" color="secondary" uppercase>
+              Tamaño
+            </Text>
+            <Text variant="bodySmall" color="secondary">
+              {scale.toFixed(2)}x
+            </Text>
+          </View>
+          <View style={{ marginTop: theme.spacing.xs }}>
+            <Slider value={scale} min={SCALE_MIN} max={SCALE_MAX} onChange={setScale} />
+          </View>
+        </View>
+
+        <View style={{ marginTop: theme.spacing.lg }}>
           <View style={styles.sliderHeader}>
             <Text variant="label" color="secondary" uppercase>
               Rotación
