@@ -82,6 +82,7 @@ export type RootStackParamList = {
   CompositionEditor: CompositionEditorParams;
   Processing: ProcessingParams;
   Result: ResultParams;
+  PlateBranding: ResultParams;
   Compare: CompareParams;
   Export: ExportParams;
   BatchProcessing: BatchProcessingParams;

@@ -134,6 +134,7 @@ export function ResultScreen({ route, navigation }: Props) {
         <View style={[styles.grid, { marginTop: theme.spacing.md }]}>
           <NavCard icon="edit" label="Editar" onPress={() => navigation.goBack()} />
           <NavCard icon="refresh" label="Regenerar" onPress={handleRegenerate} />
+          <NavCard icon="sliders" label="Logo en placa" onPress={() => navigation.navigate('PlateBranding', route.params)} />
           <NavCard
             icon="compare"
             label="Comparar"

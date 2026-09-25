@@ -93,9 +93,9 @@ function buildEditPrompt(scenePrompt: string): string {
     `1. Background: replace the entire background and environment with: ${scenePrompt}. ` +
     'Do not keep any part of the original background — floors, walls, signage, furniture, everything behind ' +
     'and around the vehicle must become the new environment.\n' +
-    '2. License plate: replace every visible license plate with a plain white dealer plate that reads ' +
-    '"COR" in bold black modern lettering, centered, matching the original plate\'s size, position and ' +
-    'perspective. Do not leave the original plate text visible.\n' +
+    '2. License plate: replace every visible license plate with a plain solid white plate — no text, no ' +
+    'numbers, no letters, no markings of any kind, just a clean blank white rectangle — matching the ' +
+    'original plate\'s size, position and perspective. Do not leave the original plate text visible.\n' +
     'Do not skip either required change. Everything else about the vehicle stays exactly the same: same ' +
     'color, shape, badges, wheels, proportions, position and angle in the frame. Match the lighting, ' +
     'reflections and shadows on the vehicle to the new environment so the composite looks photorealistic. ' +
@@ -114,8 +114,8 @@ function buildMultiEditPrompt(scenePrompt: string): string {
     'Place the vehicle from the first image into the exact environment, architecture, materials and ' +
     'lighting shown in the second image — reproduce that background as faithfully as possible, do not ' +
     `invent a different environment. Additional context for the scene: ${scenePrompt}. ` +
-    'Also replace every visible license plate with a plain white dealer plate that reads "COR" in bold ' +
-    'black lettering, matching the original plate\'s size and position. ' +
+    'Also replace every visible license plate with a plain solid white plate — no text, no numbers, no ' +
+    'markings — matching the original plate\'s size and position. ' +
     'Keep the vehicle completely unchanged: exact same color, shape, badges, wheels, proportions, ' +
     'position and angle. Match the lighting, reflections and shadows on the vehicle to the environment ' +
     'from the second image so the composite looks photorealistic. Do not alter, restyle, or redesign ' +

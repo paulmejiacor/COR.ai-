@@ -10,6 +10,7 @@ import { SceneSelectionScreen } from '../screens/SceneSelectionScreen';
 import { CompositionEditorScreen } from '../screens/CompositionEditorScreen';
 import { ProcessingScreen } from '../screens/ProcessingScreen';
 import { ResultScreen } from '../screens/ResultScreen';
+import { PlateBrandingScreen } from '../screens/PlateBrandingScreen';
 import { CompareScreen } from '../screens/CompareScreen';
 import { ExportScreen } from '../screens/ExportScreen';
 import { BatchProcessingScreen } from '../screens/BatchProcessingScreen';
@@ -49,6 +50,7 @@ export function RootNavigator() {
         <Stack.Screen name="CompositionEditor" component={CompositionEditorScreen} />
         <Stack.Screen name="Processing" component={ProcessingScreen} />
         <Stack.Screen name="Result" component={ResultScreen} />
+        <Stack.Screen name="PlateBranding" component={PlateBrandingScreen} />
         <Stack.Screen name="Compare" component={CompareScreen} />
         <Stack.Screen name="Export" component={ExportScreen} />
         <Stack.Screen name="BatchProcessing" component={BatchProcessingScreen} />
