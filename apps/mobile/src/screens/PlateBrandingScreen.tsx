@@ -190,10 +190,6 @@ export function PlateBrandingScreen({ route, navigation }: Props) {
     if (!realSize) return;
     setSaving(true);
     try {
-      // El lienzo de captura se pinta al tamaño de vista previa (preview.width),
-      // pero el logo se posicionó en esas mismas coordenadas — al pedirle a
-      // captureRef que rasterice a la resolución REAL (realSize), reescala
-      // proporcionalmente todo el contenido de la vista, logo incluido.
       const baseReady = new Promise<void>((resolve) => {
         baseImageLoadResolver.current = resolve;
       });
@@ -215,41 +211,51 @@ export function PlateBrandingScreen({ route, navigation }: Props) {
 
   const aspectRatio = realSize ? realSize.width / realSize.height : params.photoWidth / params.photoHeight;
 
+  // La vista oculta de horneado se dibuja directamente al tamaño REAL de la
+  // foto (no al tamaño chico de la vista previa en pantalla) — así
+  // captureRef() no tiene que escalar hacia arriba un contenido ya
+  // renderizado en baja resolución, que era justo lo que producía el
+  // "se pixela al agrandar" reportado. La posición/tamaño del logo, elegidos
+  // con los controles sobre la vista previa pequeña, se escalan por este
+  // mismo factor para que coincidan en la versión grande.
+  const captureScale = realSize && preview.width > 0 ? realSize.width / preview.width : 1;
+
   return (
     <Screen padded={false}>
-      {/* Vista de captura oculta — pintada dentro de los límites reales de la
-          pantalla (ver la misma lección en ExportScreen) para que Android no
-          la deje en blanco por estar fuera de la pantalla. */}
-      <View
-        ref={hiddenViewRef}
-        collapsable={false}
-        style={{ position: 'absolute', top: 0, left: 0, width: preview.width || 1, height: preview.width ? preview.width / aspectRatio : 1 }}
-      >
-        <Image
-          source={{ uri: resultImageUri }}
-          resizeMode="cover"
-          style={StyleSheet.absoluteFill}
-          onLoad={() => baseImageLoadResolver.current?.()}
-        />
-        {preview.width > 0 ? (
-          <View
-            collapsable={false}
-            style={{
-              position: 'absolute',
-              width: logoWidth,
-              height: logoHeight,
-              left: preview.width / 2 - logoWidth / 2 + offset.x,
-              top: (preview.width / aspectRatio) / 2 - logoHeight / 2 + offset.y,
-              transform: [{ rotate: `${rotation}deg` }],
-              backgroundColor: '#FFFFFF',
-              alignItems: 'center',
-              justifyContent: 'center',
-            }}
-          >
-            <Logo tone="dark" height={logoHeight * 0.7} />
-          </View>
-        ) : null}
-      </View>
+      {/* Vista de captura oculta — dibujada al tamaño REAL de la foto (no al
+          tamaño chico de la vista previa) para que captureRef() no tenga que
+          escalar hacia arriba un render ya hecho en baja resolución. Se
+          ancla en top:0/left:0 (dentro del área visible) para que Android no
+          la deje en blanco por estar fuera de pantalla — puede exceder el
+          borde inferior/derecho, eso no afecta la captura. */}
+      {realSize ? (
+        <View ref={hiddenViewRef} collapsable={false} style={{ position: 'absolute', top: 0, left: 0, width: realSize.width, height: realSize.height }}>
+          <Image
+            source={{ uri: resultImageUri }}
+            resizeMode="cover"
+            style={StyleSheet.absoluteFill}
+            onLoad={() => baseImageLoadResolver.current?.()}
+          />
+          {preview.width > 0 ? (
+            <View
+              collapsable={false}
+              style={{
+                position: 'absolute',
+                width: logoWidth * captureScale,
+                height: logoHeight * captureScale,
+                left: realSize.width / 2 - (logoWidth * captureScale) / 2 + offset.x * captureScale,
+                top: realSize.height / 2 - (logoHeight * captureScale) / 2 + offset.y * captureScale,
+                transform: [{ rotate: `${rotation}deg` }],
+                backgroundColor: '#FFFFFF',
+                alignItems: 'center',
+                justifyContent: 'center',
+              }}
+            >
+              <Logo tone="dark" height={logoHeight * captureScale * 0.7} />
+            </View>
+          ) : null}
+        </View>
+      ) : null}
 
       <View style={{ paddingHorizontal: theme.spacing.xl }}>
         <Header title="Logo en la placa" onBack={() => navigation.goBack()} />

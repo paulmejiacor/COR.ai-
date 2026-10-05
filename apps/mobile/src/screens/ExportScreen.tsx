@@ -23,8 +23,6 @@ import { resolveExportSpec, computeWatermarkLayout, type WatermarkLayout } from 
 import type { RootStackParamList } from '../navigation/types';
 import { exportImageToSpec, reencodeImage } from '../lib/exportImage';
 
-const CAPTURE_WIDTH = 360;
-
 function withTimeout<T>(promise: Promise<T>, ms: number, label: string): Promise<T> {
   return new Promise((resolve, reject) => {
     const timer = setTimeout(() => reject(new Error(`Tiempo agotado esperando: ${label}`)), ms);
@@ -136,8 +134,11 @@ export function ExportScreen({ route, navigation }: Props) {
   });
 
   const watermarkBox = computeWatermarkBox(preview.width, preview.height, watermarkLayout, watermarkCorner);
-  const captureHeight = captureSpec ? CAPTURE_WIDTH * (captureSpec.height / captureSpec.width) : 0;
-  const captureBox = computeWatermarkBox(CAPTURE_WIDTH, captureHeight, watermarkLayout, watermarkCorner);
+  // La vista oculta de horneado se dibuja al tamaño REAL de exportación (no a
+  // un ancho fijo chico como antes) — así captureRef() no escala hacia
+  // arriba un render ya hecho en baja resolución, que era justo lo que
+  // producía la pérdida de calidad reportada al exportar con marca de agua.
+  const captureBox = captureSpec ? computeWatermarkBox(captureSpec.width, captureSpec.height, watermarkLayout, watermarkCorner) : null;
 
   const handleExport = async () => {
     setExporting(true);
@@ -279,13 +280,13 @@ export function ExportScreen({ route, navigation }: Props) {
       <View
         ref={hiddenViewRef}
         collapsable={false}
-        style={{ position: 'absolute', top: 0, left: 0, width: CAPTURE_WIDTH, height: captureHeight || 1 }}
+        style={{ position: 'absolute', top: 0, left: 0, width: captureSpec?.width || 1, height: captureSpec?.height || 1 }}
       >
-        {captureImageUri ? (
+        {captureImageUri && captureSpec ? (
           <Image
             source={{ uri: captureImageUri }}
             resizeMode="stretch"
-            style={{ width: CAPTURE_WIDTH, height: captureHeight }}
+            style={{ width: captureSpec.width, height: captureSpec.height }}
             onLoad={() => captureImageLoadResolver.current?.()}
           />
         ) : null}
