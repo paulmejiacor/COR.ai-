@@ -8,6 +8,12 @@ const DEMO_USER: User = {
   planId: 'dealer',
 };
 
+/**
+ * Sin Supabase configurado, la app sigue entrando directo (sin login) como
+ * el usuario demo — así todo lo probado hasta ahora (incluido este sandbox,
+ * que no tiene acceso de red) sigue funcionando igual que antes de agregar
+ * cuentas reales.
+ */
 export class MockAuthService implements AuthService {
   async getCurrentUser(): Promise<User> {
     return DEMO_USER;
@@ -21,7 +27,20 @@ export class MockAuthService implements AuthService {
     };
   }
 
+  async signInWithEmail(): Promise<User> {
+    return DEMO_USER;
+  }
+
+  async signUpWithEmail(): Promise<User> {
+    return DEMO_USER;
+  }
+
   async signOut(): Promise<void> {
-    // No-op in the demo build.
+    // No-op en el build demo.
+  }
+
+  onAuthStateChange(callback: (user: User | null) => void): () => void {
+    callback(DEMO_USER);
+    return () => {};
   }
 }

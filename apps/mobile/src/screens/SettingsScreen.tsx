@@ -4,6 +4,7 @@ import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { Screen, Header, Text, SectionLabel, Button, useTheme } from '@cor/design-system';
 import { getCachedFalKeyOverride, loadStoredFalKey, setStoredFalKey } from '../lib/apiKeyStore';
 import { hasRealAIProvider } from '../lib/aiService';
+import { hasRealAuthProvider, resolveAuthService } from '../lib/authService';
 import type { RootStackParamList } from '../navigation/types';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Settings'>;
@@ -110,6 +111,20 @@ export function SettingsScreen({ navigation }: Props) {
             <Button label="GUARDAR" fullWidth onPress={handleSave} disabled={saving} />
             <Button label="QUITAR CLAVE GUARDADA" fullWidth variant="secondary" onPress={handleClear} disabled={saving} />
           </View>
+
+          {hasRealAuthProvider() ? (
+            <View style={{ marginTop: theme.spacing.xl }}>
+              <SectionLabel>Cuenta</SectionLabel>
+              <View style={{ marginTop: theme.spacing.md }}>
+                <Button
+                  label="CERRAR SESIÓN"
+                  fullWidth
+                  variant="secondary"
+                  onPress={() => resolveAuthService().signOut()}
+                />
+              </View>
+            </View>
+          ) : null}
         </View>
       </KeyboardAvoidingView>
     </Screen>

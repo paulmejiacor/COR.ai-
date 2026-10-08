@@ -1,19 +1,23 @@
 {
   "expo": {
-    "name": "mobile",
-    "slug": "mobile",
+    "name": "COR Automotive Studio",
+    "slug": "cor-automotive-studio",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
     "ios": {
       "supportsTablet": true,
+      "bundleIdentifier": "com.autocor.studio",
+      "buildNumber": "1",
       "infoPlist": {
         "NSCameraUsageDescription": "COR usa la cámara para fotografiar el vehículo que vas a transformar.",
         "NSPhotoLibraryUsageDescription": "COR necesita acceso a tus fotos para elegir la fotografía del vehículo."
       }
     },
     "android": {
+      "package": "com.autocor.studio",
+      "versionCode": 1,
       "adaptiveIcon": {
         "backgroundColor": "#E6F4FE",
         "foregroundImage": "./assets/android-icon-foreground.png",
