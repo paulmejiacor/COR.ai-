@@ -13,6 +13,7 @@ const REST_BASE = 'https://rest.fal.ai';
 const RUN_BASE = 'https://fal.run';
 const MODEL_SINGLE = 'fal-ai/flux-pro/kontext';
 const MODEL_MULTI = 'fal-ai/flux-pro/kontext/multi';
+const MODEL_UPSCALE = 'fal-ai/esrgan';
 
 const STAGE_ORDER: GenerationStage[] = [
   'analyzing_vehicle',
@@ -127,6 +128,37 @@ interface FalKontextResponse {
   images?: Array<{ url: string; width: number; height: number; content_type: string }>;
 }
 
+interface FalUpscaleResponse {
+  image?: { url: string; width: number; height: number; content_type: string };
+}
+
+/**
+ * FLUX.1 Kontext entrega su resultado en una resolución nativa baja
+ * (~1 megapixel) — suficiente para la pantalla de edición, pero se ve
+ * pixelada al agrandarla o exportarla en un formato grande. Real-ESRGAN es
+ * un upscaler puro (no generativo/creativo): solo reconstruye nitidez y
+ * detalle a partir de los píxeles existentes, no "reinterpreta" la imagen,
+ * así que no corre el riesgo de alterar el auto como sí pasaba con el
+ * endpoint multi-imagen. Si falla, generate() sigue con la imagen original
+ * de la IA en vez de truncar toda la generación.
+ */
+async function upscaleImage(imageUrl: string, apiKey: string): Promise<string> {
+  const response = await fetch(`${RUN_BASE}/${MODEL_UPSCALE}`, {
+    method: 'POST',
+    headers: { Authorization: `Key ${apiKey}`, 'Content-Type': 'application/json' },
+    body: JSON.stringify({ image_url: imageUrl, scale: 2 }),
+  });
+  if (!response.ok) {
+    const text = await response.text().catch(() => '');
+    throw new Error(`No se pudo mejorar la nitidez de la imagen (${response.status}): ${text.slice(0, 200)}`);
+  }
+  const data = (await response.json()) as FalUpscaleResponse;
+  if (!data.image?.url) {
+    throw new Error('El servicio de nitidez no devolvió ninguna imagen.');
+  }
+  return data.image.url;
+}
+
 /**
  * Proveedor real: FLUX.1 Kontext [pro] en fal.ai. Edita por instrucción de
  * texto (no requiere una máscara de segmentación aparte — se evaluó sumar
@@ -199,14 +231,25 @@ export class FalKontextAIImageService implements AIImageService {
 
     emit(3);
     await delay(150);
+
     emit(4);
-    await delay(150);
+    let finalImageUri = resultImageUri;
+    try {
+      finalImageUri = await upscaleImage(resultImageUri, this.apiKey);
+    } catch {
+      // Si el escalado de nitidez falla, el usuario se queda con la imagen
+      // de la IA tal cual (igual que antes de este cambio) en vez de perder
+      // toda la generación por un paso extra que es una mejora, no un
+      // requisito.
+    }
+
     emit(5);
+    await delay(150);
 
     return {
       id: uid('gen'),
       requestSnapshot: request,
-      resultImageUri,
+      resultImageUri: finalImageUri,
       integrityReport: { passed: true, flaggedAttributes: [] },
       createdAt: new Date().toISOString(),
     };
