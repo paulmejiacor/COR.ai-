@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react';
+import { useRef, useState, type ComponentRef } from 'react';
 import { Alert, Image, Platform, Pressable, ScrollView, TextInput, View, StyleSheet } from 'react-native';
 import { captureRef } from 'react-native-view-shot';
 import * as MediaLibrary from 'expo-media-library/legacy';
@@ -122,7 +122,7 @@ export function ExportScreen({ route, navigation }: Props) {
 
   const [captureImageUri, setCaptureImageUri] = useState<string | null>(null);
   const [captureSpec, setCaptureSpec] = useState<{ width: number; height: number } | null>(null);
-  const hiddenViewRef = useRef<View>(null);
+  const hiddenViewRef = useRef<ComponentRef<typeof View>>(null);
   const captureImageLoadResolver = useRef<(() => void) | null>(null);
   const captureLogoLoadResolver = useRef<(() => void) | null>(null);
 

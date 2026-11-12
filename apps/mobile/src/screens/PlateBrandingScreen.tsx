@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, type ComponentRef } from 'react';
 import {
   Alert,
   Image,
@@ -19,7 +19,7 @@ type Props = NativeStackScreenProps<RootStackParamList, 'PlateBranding'>;
 const SCALE_MIN = 0.3;
 const SCALE_MAX = 3;
 
-function distanceBetween(touches: Array<{ pageX: number; pageY: number }>) {
+function distanceBetween(touches: ReadonlyArray<{ pageX: number; pageY: number }>) {
   const [a, b] = touches;
   return Math.hypot(a.pageX - b.pageX, a.pageY - b.pageY);
 }
@@ -72,7 +72,7 @@ export function PlateBrandingScreen({ route, navigation }: Props) {
   const [rotation, setRotation] = useState(0);
   const [saving, setSaving] = useState(false);
 
-  const hiddenViewRef = useRef<View>(null);
+  const hiddenViewRef = useRef<ComponentRef<typeof View>>(null);
   const baseImageLoadResolver = useRef<(() => void) | null>(null);
 
   useEffect(() => {

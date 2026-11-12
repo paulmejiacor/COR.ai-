@@ -19,7 +19,7 @@ const POSITION_OPTIONS: { value: HorizontalPosition; label: string }[] = [
 
 const clamp = (v: number, min: number, max: number) => Math.min(max, Math.max(min, v));
 
-function distanceBetween(touches: Array<{ pageX: number; pageY: number }>) {
+function distanceBetween(touches: ReadonlyArray<{ pageX: number; pageY: number }>) {
   const [a, b] = touches;
   return Math.hypot(a.pageX - b.pageX, a.pageY - b.pageY);
 }
