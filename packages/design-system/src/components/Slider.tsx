@@ -23,7 +23,15 @@ export function Slider({ value, min, max, onChange }: SliderProps) {
   const panResponder = useRef(
     PanResponder.create({
       onStartShouldSetPanResponder: () => true,
+      onStartShouldSetPanResponderCapture: () => true,
       onMoveShouldSetPanResponder: () => true,
+      onMoveShouldSetPanResponderCapture: () => true,
+      // Sin esto, el ScrollView que casi siempre envuelve al Slider le quita
+      // el control del gesto a mitad del arrastre en cuanto detecta
+      // movimiento — se siente como que "la pantalla se mueve sola" al
+      // tratar de deslizar. Al negarlo, el Slider conserva el gesto
+      // completo desde que el dedo lo toca hasta que lo suelta.
+      onPanResponderTerminationRequest: () => false,
       onPanResponderGrant: (evt: GestureResponderEvent) => {
         onChange(min + clampRatio(evt.nativeEvent.locationX) * (max - min));
       },
