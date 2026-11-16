@@ -30,6 +30,20 @@ export interface VehicleMask {
   status: 'pending' | 'detected' | 'reviewed';
 }
 
+/**
+ * Caja delimitadora de la placa detectada en una foto ya generada, en
+ * coordenadas normalizadas (0-1, fracción del ancho/alto de la imagen) —
+ * así no depende de a qué resolución se haya generado o escalado la foto.
+ * `confidence` es 0-1; valores bajos deben tratarse como "no se encontró".
+ */
+export interface LicensePlateDetection {
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+  confidence: number;
+}
+
 /** The protected subject of every composition — never redesigned by the AI. */
 export interface Vehicle {
   id: string;

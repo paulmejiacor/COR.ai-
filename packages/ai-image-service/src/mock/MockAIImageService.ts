@@ -5,6 +5,7 @@ import type {
   GenerationProgressEvent,
   GenerationStage,
   VehicleIntegrityReport,
+  LicensePlateDetection,
 } from '@cor/shared-types';
 import type { AIImageService, DetectVehicleResult } from '../AIImageService';
 
@@ -93,5 +94,13 @@ export class MockAIImageService implements AIImageService {
   async checkVehicleIntegrity(result: GenerationResult): Promise<VehicleIntegrityReport> {
     await delay(300);
     return result.integrityReport;
+  }
+
+  async detectLicensePlate(): Promise<LicensePlateDetection | null> {
+    await delay(400);
+    // Aproximación fija para poder probar el flujo de auto-colocación en modo
+    // demo (sin IA real): una placa típica queda cerca del centro horizontal,
+    // en el tercio inferior del auto.
+    return { x: 0.38, y: 0.62, width: 0.24, height: 0.08, confidence: 0.9 };
   }
 }

@@ -6,6 +6,7 @@ import type {
   GenerationResult,
   GenerationProgressEvent,
   VehicleIntegrityReport,
+  LicensePlateDetection,
 } from '@cor/shared-types';
 
 export interface DetectVehicleResult {
@@ -51,6 +52,15 @@ export interface AIImageService {
    * against the original reference and flags likely identity drift.
    */
   checkVehicleIntegrity(result: GenerationResult): Promise<VehicleIntegrityReport>;
+
+  /**
+   * Ubica la placa (que la IA deja en blanco — ver buildEditPrompt) en una
+   * foto ya generada, para colocar el logo real de COR ahí automáticamente
+   * en vez de que el usuario tenga que arrastrarlo a mano. `null` = no se
+   * encontró con suficiente confianza; quien llama debe caer de vuelta al
+   * posicionamiento manual (centrado) en ese caso, nunca bloquear el flujo.
+   */
+  detectLicensePlate(imageUri: string): Promise<LicensePlateDetection | null>;
 }
 
 export interface AIImageServiceConfig {

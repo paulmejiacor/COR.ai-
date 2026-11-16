@@ -12,6 +12,7 @@ import {
 import { captureRef } from 'react-native-view-shot';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { Screen, Header, Text, SectionLabel, Button, Slider, Logo, useTheme } from '@cor/design-system';
+import { resolveAIImageService } from '../lib/aiService';
 import type { RootStackParamList } from '../navigation/types';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'PlateBranding'>;
@@ -71,6 +72,8 @@ export function PlateBrandingScreen({ route, navigation }: Props) {
   const [scale, setScale] = useState(1);
   const [rotation, setRotation] = useState(0);
   const [saving, setSaving] = useState(false);
+  const [autoDetect, setAutoDetect] = useState<'detecting' | 'found' | 'not_found'>('detecting');
+  const autoDetectRanRef = useRef(false);
 
   const hiddenViewRef = useRef<ComponentRef<typeof View>>(null);
   const baseImageLoadResolver = useRef<(() => void) | null>(null);
@@ -89,6 +92,41 @@ export function PlateBrandingScreen({ route, navigation }: Props) {
       cancelled = true;
     };
   }, [resultImageUri, params.photoWidth, params.photoHeight]);
+
+  // Intenta ubicar la placa sola (vía detección por IA en FalKontextAIImageService)
+  // para no obligar al usuario a arrastrar el logo a mano cada vez — si no la
+  // encuentra (o el proveedor es el mock), se queda el centrado manual de
+  // siempre, sin bloquear nada. Solo corre una vez, cuando ya se conoce el
+  // tamaño real de la vista previa (necesario para convertir la caja
+  // normalizada de la detección a coordenadas de pantalla).
+  useEffect(() => {
+    if (autoDetectRanRef.current || preview.width <= 0 || preview.height <= 0) return;
+    autoDetectRanRef.current = true;
+
+    resolveAIImageService()
+      .detectLicensePlate(resultImageUri)
+      .then((detection) => {
+        if (!detection) {
+          setAutoDetect('not_found');
+          return;
+        }
+        const plateWidthPx = detection.width * preview.width;
+        const plateHeightPx = detection.height * preview.height;
+        const plateCenterX = detection.x * preview.width + plateWidthPx / 2;
+        const plateCenterY = detection.y * preview.height + plateHeightPx / 2;
+
+        const logoAspect = 759 / 264;
+        const scaleToFitWidth = plateWidthPx / (LOGO_BASE_HEIGHT * logoAspect);
+        const scaleToFitHeight = plateHeightPx / LOGO_BASE_HEIGHT;
+        // 0.92 para quedar un poco adentro del borde detectado en vez de justo al límite.
+        const fittedScale = clamp(Math.min(scaleToFitWidth, scaleToFitHeight) * 0.92, SCALE_MIN, SCALE_MAX);
+
+        setScale(fittedScale);
+        setOffset({ x: plateCenterX - preview.width / 2, y: plateCenterY - preview.height / 2 });
+        setAutoDetect('found');
+      })
+      .catch(() => setAutoDetect('not_found'));
+  }, [resultImageUri, preview.width, preview.height]);
 
   const offsetRef = useRef(offset);
   useEffect(() => {
@@ -266,9 +304,22 @@ export function PlateBrandingScreen({ route, navigation }: Props) {
         <Text variant="title" style={{ marginTop: theme.spacing.md }}>
           Coloca el logo sobre la placa
         </Text>
-        <Text variant="bodySmall" color="secondary" style={{ marginTop: theme.spacing.xs, marginBottom: theme.spacing.lg }}>
+        <Text variant="bodySmall" color="secondary" style={{ marginTop: theme.spacing.xs, marginBottom: theme.spacing.xs }}>
           Arrastra el logo con un dedo para moverlo, y usa los controles de abajo para ajustar su tamaño y rotación hasta
           que quede alineado con la placa.
+        </Text>
+        <Text
+          variant="bodySmall"
+          style={{
+            marginBottom: theme.spacing.lg,
+            color: autoDetect === 'found' ? theme.colors.accent : theme.colors.textSecondary,
+          }}
+        >
+          {autoDetect === 'detecting'
+            ? '● Buscando la placa automáticamente…'
+            : autoDetect === 'found'
+              ? '● Placa detectada — ajusta si hace falta.'
+              : '● No se detectó sola esta vez, colócala a mano.'}
         </Text>
 
         <View

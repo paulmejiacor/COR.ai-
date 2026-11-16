@@ -1,3 +1,4 @@
+import { Image } from 'react-native';
 import * as FileSystem from 'expo-file-system/legacy';
 import type {
   SourcePhoto,
@@ -6,6 +7,7 @@ import type {
   GenerationProgressEvent,
   GenerationStage,
   VehicleIntegrityReport,
+  LicensePlateDetection,
 } from '@cor/shared-types';
 import type { AIImageService, DetectVehicleResult } from '../AIImageService';
 
@@ -14,6 +16,10 @@ const RUN_BASE = 'https://fal.run';
 const MODEL_SINGLE = 'fal-ai/flux-pro/kontext';
 const MODEL_MULTI = 'fal-ai/flux-pro/kontext/multi';
 const MODEL_UPSCALE = 'fal-ai/esrgan';
+const MODEL_DETECTION = 'fal-ai/florence-2-large';
+/** Una placa real no debería ocupar más de ~35% del ancho/alto de la foto — si el modelo
+ * devuelve algo más grande que eso probablemente se enganchó con el auto entero, no la placa. */
+const MAX_PLAUSIBLE_PLATE_FRACTION = 0.35;
 
 const STAGE_ORDER: GenerationStage[] = [
   'analyzing_vehicle',
@@ -159,6 +165,60 @@ async function upscaleImage(imageUrl: string, apiKey: string): Promise<string> {
   return data.image.url;
 }
 
+function getImageDimensions(uri: string): Promise<{ width: number; height: number }> {
+  return new Promise((resolve, reject) => {
+    Image.getSize(uri, (width, height) => resolve({ width, height }), reject);
+  });
+}
+
+interface FalDetectionResponse {
+  results?: Record<string, { bboxes?: number[][]; labels?: string[] }>;
+  // Algunas respuestas de Florence-2 devuelven la tarea directo como llave de nivel superior
+  // en vez de anidada bajo "results" — se revisan ambas formas por las dudas.
+  [taskKey: string]: unknown;
+}
+
+/**
+ * Localiza la placa (que buildEditPrompt deja en blanco) en una foto ya
+ * generada, usando Florence-2 (modelo de detección por texto abierto) vía
+ * fal.ai — mismo host/clave que ya se usa para generar y mejorar nitidez,
+ * sin necesidad de subir la imagen de nuevo porque ya vive en el CDN de
+ * fal.ai. Devuelve `null` ante cualquier respuesta rara o sin caja
+ * plausible — quien llama debe caer de vuelta al centrado manual, nunca
+ * bloquear el flujo por esto.
+ */
+async function detectPlateBoundingBox(imageUrl: string, apiKey: string): Promise<LicensePlateDetection | null> {
+  try {
+    const [response, { width: imgWidth, height: imgHeight }] = await Promise.all([
+      fetch(`${RUN_BASE}/${MODEL_DETECTION}`, {
+        method: 'POST',
+        headers: { Authorization: `Key ${apiKey}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ image_url: imageUrl, task: '<CAPTION_TO_PHRASE_GROUNDING>', text_input: 'license plate' }),
+      }),
+      getImageDimensions(imageUrl),
+    ]);
+
+    if (!response.ok || imgWidth <= 0 || imgHeight <= 0) return null;
+
+    const data = (await response.json()) as FalDetectionResponse;
+    const taskResult =
+      data.results?.['<CAPTION_TO_PHRASE_GROUNDING>'] ?? (data['<CAPTION_TO_PHRASE_GROUNDING>'] as { bboxes?: number[][] } | undefined);
+    const box = taskResult?.bboxes?.[0];
+    if (!box || box.length < 4) return null;
+
+    const [x1, y1, x2, y2] = box;
+    const width = (x2 - x1) / imgWidth;
+    const height = (y2 - y1) / imgHeight;
+    if (width <= 0 || height <= 0 || width > MAX_PLAUSIBLE_PLATE_FRACTION || height > MAX_PLAUSIBLE_PLATE_FRACTION) {
+      return null;
+    }
+
+    return { x: x1 / imgWidth, y: y1 / imgHeight, width, height, confidence: 1 };
+  } catch {
+    return null;
+  }
+}
+
 /**
  * Proveedor real: FLUX.1 Kontext [pro] en fal.ai. Edita por instrucción de
  * texto (no requiere una máscara de segmentación aparte — se evaluó sumar
@@ -257,5 +317,9 @@ export class FalKontextAIImageService implements AIImageService {
 
   async checkVehicleIntegrity(result: GenerationResult): Promise<VehicleIntegrityReport> {
     return result.integrityReport;
+  }
+
+  async detectLicensePlate(imageUri: string): Promise<LicensePlateDetection | null> {
+    return detectPlateBoundingBox(imageUri, this.apiKey);
   }
 }
